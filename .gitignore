@@ -1,0 +1,23 @@
+# IoT Workshop Git Ignore
+
+# Sensitive Overleaf Files
+.olauth
+.olproject
+.olignore
+.olcli.json
+
+# LaTeX temporary files
+*.aux
+*.log
+*.out
+*.toc
+*.nav
+*.snm
+*.vrb
+*.gz
+*.fdb_latexmk
+*.fls
+
+# OS Files
+.DS_Store
+Thumbs.db
