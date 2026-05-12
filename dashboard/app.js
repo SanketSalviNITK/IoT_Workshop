@@ -440,7 +440,7 @@ function setupThreeJS() {
 
     // Relay Nodes
     teams.forEach((t, i) => {
-        const a = (i / teams.length) * Math.PI * 2, r = 70;
+        const a = (i / teams.length) * Math.PI * 2, r = 45;
         const group = new THREE.Group();
         group.add(new THREE.Mesh(new THREE.BoxGeometry(4, 1, 4), new THREE.MeshPhongMaterial({ color: 0x111111 })));
         const diam = new THREE.Mesh(new THREE.OctahedronGeometry(1.5), new THREE.MeshPhongMaterial({ color: PROGRESS_COLORS[0], emissive: PROGRESS_COLORS[0], emissiveIntensity: 2 }));
