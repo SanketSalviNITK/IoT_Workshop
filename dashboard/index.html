@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE LAST BEACON | Mission Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 3D Canvas -->
+    <canvas id="canvas3d"></canvas>
+
+    <!-- Overlay UI -->
+    <div id="ui-overlay">
+        <!-- Setup Screen -->
+        <div id="setup-screen" class="panel">
+            <h1>INITIATING MISSION CONTROL</h1>
+            <div class="input-group">
+                <label for="team-count">NUMBER OF BEACON TEAMS (1-30):</label>
+                <input type="number" id="team-count" min="1" max="30" value="5">
+                <button id="start-btn">ENGAGE SYSTEMS</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen (Hidden initially) -->
+        <div id="dashboard" class="hidden">
+            <!-- Mission Briefing Modal -->
+            <div id="briefing-modal" class="panel hidden">
+                <div class="panel-header">
+                    <span id="modal-team-name">TEAM NAME</span>: MISSION <span id="modal-mission-num">1</span>
+                    <button id="close-modal">×</button>
+                </div>
+                <div id="briefing-content">
+                    <p id="mission-desc">Mission description goes here...</p>
+                    <div class="challenge-box">
+                        <strong>YOUR UNIQUE CHALLENGE:</strong>
+                        <p id="mission-challenge">Challenge details...</p>
+                    </div>
+                    <textarea id="code-input" placeholder="PASTE YOUR CODE SNIPPET HERE..."></textarea>
+                    <div id="validation-msg"></div>
+                    <button id="submit-code">VERIFY INTEGRITY</button>
+                </div>
+            </div>
+            <!-- Left Panel: Mission Status -->
+            <div id="mission-panel" class="panel">
+                <div class="panel-header">
+                    <span class="glitch-text" data-text="MISSION STATUS">MISSION STATUS</span>
+                </div>
+                <div id="team-list">
+                    <!-- Teams will be injected here -->
+                </div>
+            </div>
+
+            <!-- Bottom Right: A.R.I.A. Log -->
+            <div id="aria-log" class="panel">
+                <div class="panel-header">A.R.I.A. SYSTEM LOG</div>
+                <div id="log-content">
+                    <div class="log-entry">> Initializing A.R.I.A. v4.2...</div>
+                    <div class="log-entry">> Checking Life Support... STABLE</div>
+                    <div class="log-entry">> Beacon Signal... WEAK</div>
+                </div>
+            </div>
+
+            <!-- Top Right: Global Progress -->
+            <div id="global-status" class="panel">
+                <div class="label">GLOBAL SYNC</div>
+                <div id="global-percent">0%</div>
+                <div class="sync-bar"><div id="global-bar-fill"></div></div>
+            </div>
+        </div>
+
+        <!-- Victory Overlay -->
+        <div id="victory-overlay" class="hidden">
+            <div class="victory-content">
+                <h1 class="glitch-text" data-text="MISSION ACCOMPLISHED">MISSION ACCOMPLISHED</h1>
+                <p>THE BEACON IS FULLY RESTORED. RESCUE SIGNAL TRANSMITTED.</p>
+                <button onclick="location.reload()">RE-INITIATE SYSTEMS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js and App Logic -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "@tweenjs/tween.js": "https://unpkg.com/@tweenjs/tween.js@23.1.1/dist/tween.esm.js"
+            }
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>

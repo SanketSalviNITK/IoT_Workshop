@@ -1,29 +1,36 @@
-# IoT Workshop: Building the Connected World
+# THE LAST BEACON: IoT Masterclass
 
-Welcome to the **1-Day Hands-on IoT Workshop**. This repository contains all the resources, code samples, and presentations required for the workshop.
+Welcome to **The Last Beacon**, an immersive, gamified IoT workshop experience. 
 
-![IoT Workshop Banner](./assets/iot_workshop_banner.png)
-
-## 📋 Table of Contents
-1. [Syllabus](./syllabus.md)
-2. [Session 1: The IoT Ecosystem](./sessions/session1_introduction/)
-3. [Session 2: Interfacing and Logic](./sessions/session2_sensors_actuators/)
-4. [Session 3: Cloud Integration with Blynk](./sessions/session3_connectivity/)
-5. [Session 4: Advanced Cloud Features & Alerts](./sessions/session4_cloud_dashboard/)
-6. [Hardware References](./hardware/)
-7. [Installation Guide](./installation.md)
-
-## 🛠️ Hardware Requirements
-- NodeMCU (ESP8266 or ESP32 version)
-- Breadboard & Jumper Wires
-- Sensors: LDR (Light), DHT11 (Temp/Humidity), Buttons
-- Actuators: LEDs, Buzzers
-- USB Cable (Micro-USB)
-
-## 💻 Software Requirements
-- Arduino IDE / VS Code with PlatformIO
-- ESP32 Board Manager
-- Required Libraries (listed in each session)
+## 🌌 The Mission
+Participants act as **Beacon Engineers** on a mission to restore a damaged relay station on "The Island of Dharani." Each subsystem repaired (each IoT experiment completed) brings humanity one step closer to rescue.
 
 ---
-Developed with ❤️ for the IoT Community.
+
+## 🛠️ Hardware Requirements
+- **Microcontroller**: NodeMCU (ESP8266) with Expansion Board
+- **Sensors**: DHT22 (Temp/Hum), HC-SR04 (Ultrasonic), IR Obstacle Sensor, Push Button
+- **Actuators**: Red/Green LEDs, Active Buzzer
+- **Misc**: Jumper Wires, Micro-USB Cable
+
+---
+
+## 📂 Repository Structure
+- [**missions/**](./missions/): The core code library for Missions 1-6 and the Final Beacon activation.
+- [**dashboard/**](./dashboard/): The interactive 3D Mission Control (Three.js).
+- [**presentation/**](./presentation/): The Master Beamer slide deck for the workshop.
+- [**THE_LAST_BEACON_CAMPAIGN.md**](./THE_LAST_BEACON_CAMPAIGN.md): The full instructor guide, AI dialogues, and gamification rules.
+
+---
+
+## 🚀 Getting Started
+1. **Prepare the Mission Control**: Open `dashboard/index.html` to track team progress.
+2. **Brief the Engineers**: Use the `presentation/Presentation.pdf` to set the scene.
+3. **Initiate Repairs**: Follow the `missions/` sequence to teach IoT fundamentals through the story.
+
+---
+
+**Facilitator:**
+**Dr. Sanket Salvi**
+Assistant Professor, MIT-WPU Pune
+[GitHub Profile](https://github.com/SanketSalviNITK)

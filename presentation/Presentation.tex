@@ -1,0 +1,150 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+
+% --- Custom Colors ---
+\definecolor{IoTCyan}{RGB}{0, 255, 204}
+\definecolor{IoTBlue}{RGB}{0, 102, 255}
+\definecolor{IoTGrey}{RGB}{80, 80, 80}
+\definecolor{IoTWhite}{RGB}{240, 240, 240}
+\definecolor{IoTBlack}{RGB}{5, 5, 5}
+
+\setbeamercolor{palette primary}{bg=IoTBlack, fg=IoTCyan}
+\setbeamercolor{palette secondary}{bg=IoTBlack, fg=IoTBlue}
+\setbeamercolor{palette tertiary}{bg=IoTBlack, fg=IoTWhite}
+\setbeamercolor{background canvas}{bg=IoTBlack}
+\setbeamercolor{normal text}{fg=IoTWhite}
+\setbeamercolor{title}{fg=IoTCyan}
+\setbeamercolor{frametitle}{fg=IoTCyan}
+
+\usepackage{tikz}
+\usepackage{listings}
+\lstset{
+  language=C++,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{IoTCyan},
+  stringstyle=\color{IoTBlue},
+  commentstyle=\color{IoTGrey},
+  breaklines=true,
+  showstringspaces=false
+}
+
+% --- Title Page Info ---
+\title{THE LAST BEACON}
+\subtitle{IoT Masterclass: Operational Protocol}
+\author{Dr. Sanket Salvi}
+\institute{Assistant Professor \\ Dept. of Computer Engineering \& Technology \\ School of Computer Science \& Engineering \\ Dr. Vishwanath Karad MIT World Peace University, Pune}
+\date{May 2026}
+
+\begin{document}
+
+% --- Title Slide ---
+{
+\setbeamertemplate{footline}{} 
+\begin{frame}
+    \titlepage
+\end{frame}
+}
+
+% --- Facilitator Slide ---
+\begin{frame}{Meet your Head of Operations}
+    \begin{columns}
+        \column{0.4\textwidth}
+        \centering
+        \begin{tikzpicture}
+            \clip (0,0) circle (1.5);
+            \node at (0,0) {\includegraphics[width=3cm]{Profile.png}};
+            \draw[IoTCyan, ultra thick] (0,0) circle (1.5);
+        \end{tikzpicture}
+        \vspace{0.5cm}
+        \Large \textbf{Dr. Sanket Salvi}
+        
+        \column{0.6\textwidth}
+        \begin{itemize}
+            \item \textbf{Designation}: Assistant Professor, MIT-WPU Pune.
+            \item \textbf{Background}: PhD in IT (NITK Surathkal).
+            \item \textbf{Research}: IoT, Cloud Computing, VLC, Li-Fi.
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\section{Foundation}
+\begin{frame}{The Grid: IoT Fundamentals}
+    \begin{itemize}
+        \item \textbf{IoT Layers}:
+            \begin{itemize}
+                \item \textit{Perception}: Sensors/Actuators (The Station's Senses).
+                \item \textit{Network}: WiFi/Protocols (The Communication Grid).
+                \item \textit{Application}: Cloud/Dashboards (A.R.I.A's Interface).
+            \end{itemize}
+        \item \textbf{The Core}: Microcontrollers (MCU) like NodeMCU are the "Brains".
+        \item \textbf{MPU vs MCU}: MPUs (PC/Mobile) are general-purpose; MCUs are dedicated, low-power, and real-time.
+    \end{itemize}
+\end{frame}
+
+\section{Missions}
+\begin{frame}{MISSION 1: THE SPARK (Power Core)}
+    \textit{A.R.I.A: "Ignite the core... I need a pulse."}
+    \begin{itemize}
+        \item \textbf{Hardware}: NodeMCU + Red LED.
+        \item \textbf{Theory}: Digital Output (GPIO).
+        \item \textbf{Task}: Write a blink program to stabilize the station's energy.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MISSION 2: AUTHENTICATION (Input Logic)}
+    \textit{A.R.I.A: "Confirm identity... Flesh and blood required."}
+    \begin{itemize}
+        \item \textbf{Theory}: Digital Input \& Floating Pins.
+        \item \textbf{Internal Pull-up}: Using \texttt{INPUT\_PULLUP} to stabilize noise.
+        \item \textbf{Task}: Use a Push Button to toggle the Green Authorization LED.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MISSION 3: SIREN PROTOCOL (PWM)}
+    \textit{A.R.I.A: "Intruders detected. Sound the alarm."}
+    \begin{itemize}
+        \item \textbf{Theory}: Pulse Width Modulation (PWM) and Frequency.
+        \item \textbf{Task}: Use the Buzzer to create a high-pitch warning sequence.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MISSION 4: SECURITY GRID (IR Sensing)}
+    \textit{A.R.I.A: "The corridor is dark... monitor the shadows."}
+    \begin{itemize}
+        \item \textbf{Theory}: IR Active-Low logic (Reflection detection).
+        \item \textbf{Task}: Link the IR sensor to the alarm system for perimeter security.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MISSION 5: RADAR ARRAY (Ultrasonic)}
+    \textit{A.R.I.A: "Rescue drone detected. Guide it to the dock."}
+    \begin{itemize}
+        \item \textbf{Theory}: Sound Speed (340 m/s) and Pulse Timing.
+        \item \textbf{Formula}: \texttt{Distance = (Time * 0.034) / 2}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MISSION 6: LIFE SUPPORT (DHT22)}
+    \textit{A.R.I.A: "Atmosphere failing... balance the temperature."}
+    \begin{itemize}
+        \item \textbf{Theory}: 1-Wire Communication Protocols.
+        \item \textbf{Task}: Monitor Temp/Humidity to prevent station overheating.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{FINAL MISSION: THE LAST BEACON}
+    \centering
+    \Huge \textcolor{IoTCyan}{INTEGRATION PHASE}
+    \vspace{0.5cm}
+    \large
+    \begin{enumerate}
+        \item Auth Code: OK
+        \item Security: CLEAR
+        \item Drone: DOCKED
+        \item Life Support: STABLE
+    \end{enumerate}
+    \textit{A.R.I.A: "ALL SYSTEMS READY. TRANSMIT THE SIGNAL."}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,333 @@
+:root {
+    --bg-dark: #050505;
+    --panel-bg: rgba(10, 25, 47, 0.8);
+    --cyan: #00ffcc;
+    --blue: #0066ff;
+    --obsidian: #0a192f;
+    --border: rgba(0, 255, 204, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--cyan);
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#canvas3d {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#ui-overlay {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out;
+}
+
+#ui-overlay * {
+    pointer-events: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#setup-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    text-align: center;
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+
+#dashboard {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+#setup-screen h1 {
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input[type="number"] {
+    background: transparent;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    padding: 10px;
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+}
+
+button {
+    background: var(--cyan);
+    color: var(--bg-dark);
+    border: none;
+    padding: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: white;
+    box-shadow: 0 0 15px var(--cyan);
+}
+
+/* Dashboard UI */
+#mission-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.panel-header {
+    font-family: 'Orbitron', sans-serif;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+/* Team Row */
+.team-row {
+    margin-bottom: 20px;
+}
+
+.team-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.team-name {
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.team-progress {
+    display: flex;
+    gap: 4px;
+}
+
+.segment {
+    flex: 1;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(0, 255, 204, 0.1);
+}
+
+.segment.active {
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+}
+
+/* ARIA Log */
+#aria-log {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    height: 150px;
+}
+
+#log-content {
+    font-size: 0.8rem;
+    color: var(--blue);
+    overflow: hidden;
+}
+
+.log-entry {
+    margin-bottom: 5px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Global Status */
+#global-status {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    text-align: right;
+}
+
+#global-percent {
+    font-size: 2.5rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.sync-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    margin-top: 5px;
+}
+
+#global-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: var(--cyan);
+    transition: 1s;
+}
+
+/* Victory Overlay */
+#victory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.victory-content h1 {
+    font-size: 4rem;
+    font-family: 'Orbitron', sans-serif;
+    color: var(--cyan);
+    margin-bottom: 20px;
+}
+
+/* --- Briefing Modal --- */
+#briefing-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    z-index: 200;
+    pointer-events: auto;
+    border: 2px solid var(--cyan);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+}
+
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(15px);
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+}
+
+#close-modal {
+    background: transparent;
+    color: var(--cyan);
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    float: right;
+}
+
+.challenge-box {
+    background: rgba(0, 255, 204, 0.1);
+    border-left: 4px solid var(--cyan);
+    padding: 15px;
+    margin: 15px 0;
+    font-size: 0.9rem;
+}
+
+#code-input {
+    width: 100%;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--blue);
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px;
+    margin-bottom: 10px;
+    resize: none;
+}
+
+#validation-msg {
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    height: 20px;
+}
+
+.error-msg { color: #ff3300; }
+.success-msg { color: #33ff00; }
+
+#submit-code {
+    width: 100%;
+    letter-spacing: 2px;
+}
+
+@keyframes noise-anim {
+    0% { clip: rect(10px, 9999px, 40px, 0); }
+    20% { clip: rect(30px, 9999px, 60px, 0); }
+    40% { clip: rect(70px, 9999px, 90px, 0); }
+    60% { clip: rect(20px, 9999px, 50px, 0); }
+    80% { clip: rect(50px, 9999px, 80px, 0); }
+    100% { clip: rect(10px, 9999px, 40px, 0); }
+}
+
+/* --- Holographic Scanlines --- */
+#ui-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+@keyframes flicker {
+    0% { opacity: 0.8; }
+    5% { opacity: 0.5; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.4; }
+    20% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+#dashboard {
+    animation: flicker 0.1s infinite alternate;
+    animation-play-state: paused;
+}
+
+#dashboard.glitching {
+    animation-play-state: running;
+}
