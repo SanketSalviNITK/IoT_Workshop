@@ -7,6 +7,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import * as TWEEN from '@tweenjs/tween.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
+console.log("📡 BEACON SYSTEM: CORE LOGIC INITIALIZED.");
+
 // --- Configuration & Constants ---
 // [ FACILITATOR ACTION REQUIRED ]: Paste your Supabase details here!
 const SUPABASE_URL = "https://ppreqzqzftogctijyzqx.supabase.co";
@@ -24,51 +26,65 @@ const MISSIONS = [
     { 
         title: "The Spark", 
         desc: "Initialize the emergency beacon's status lights.", 
+        lore: "The Great Dark has arrived. Sector 7's primary power is gone. We need to jumpstart the status LEDs to signal the rescue fleet. Without light, we are invisible.",
+        docs: "Use <code>digitalWrite(D1, HIGH)</code> and <code>delay(ms)</code>. Ensure your pins (D1, D2) match the wiring directive.",
         challenge: (team) => `Alternating Blink: Red (D1) and Green (D2). Set the delay to exactly ${150 + (team.id * 30)}ms.`, 
         validate: (code, team) => { const d = 150 + (team.id * 30); return code.includes("D1") && code.includes("D2") && code.includes(`delay(${d})`); } 
     },
     { 
         title: "Manual Ignition", 
         desc: "Build thermal pressure in the core using the physical ignition button.", 
+        lore: "The fusion core is cold. Manual compression is required. You must hold the ignition sequence until the core stabilizes at critical mass.",
+        docs: "Check <code>digitalRead(D0)</code>. Use a <code>while</code> loop or <code>millis()</code> to track the duration. Output 'IGNITION_COMPLETE' to Serial.",
         challenge: (team) => `Hold the Physical Button (D0) for exactly ${2 + team.id} seconds. Watch for 'IGNITION_COMPLETE'.`, 
         validate: (code, team) => { const wait = (2 + team.id) * 1000; return code.includes("D0") && code.includes("IGNITION_COMPLETE") && code.includes(`${wait}`); } 
     },
     { 
         title: "Sonic Shield", 
-        desc: "Deploy the sonar perimeter using the Ultrasonic sensor.", 
-        challenge: (team) => `Trigger the Buzzer (D5) when the Ultrasonic Sensor detects an object within ${10 + team.id}cm.`, 
-        validate: (code, team) => { const dist = 10 + team.id; return code.includes("D6") && code.includes("D7") && code.includes("D5") && code.includes(`< ${dist}`); } 
+        desc: "Calibrate the proximity sensors to detect approaching debris.", 
+        lore: "Asteroid fragments are closing in. Our sonar array is misaligned. Calibrate your proximity sensors to create a sonic perimeter.",
+        docs: "Use the Ultrasonic sensor (Trig/Echo). Distance = <code>(duration/2) / 29.1</code>. Target distance must be precise.",
+        challenge: (team) => `Distance Lock: Set your Ultrasonic sensor to trigger at exactly ${10 + (team.id * 2)}cm.`, 
+        validate: (code, team) => { const dist = 10 + (team.id * 2); return code.includes("trig") && code.includes("echo") && code.includes(`${dist}`); } 
     },
     { 
-        title: "Climate Pulse", 
-        desc: "Sync DHT22 life support data with the terminal engine.", 
-        challenge: (team) => `Read DHT22 (D3). Print 'BEACON_CORE_${team.id}: ' followed by the value.`, 
-        validate: (code, team) => code.includes("DHT") && code.includes("D3") && code.includes(`BEACON_CORE_${team.id}`) 
+        title: "Climate Control", 
+        desc: "Stabilize the atmosphere by monitoring temperature fluctuations.", 
+        lore: "Life support is failing. The oxygen scrubbers are overheating. Monitor the thermal fluctuations and engage the cooling fans.",
+        docs: "Use the DHT11 or Analog Temp sensor. Read values using <code>analogRead()</code> or the DHT library. Log data to the Serial Plotter.",
+        challenge: (team) => `Thermal Sync: Log temperature data. Trigger a warning if the value exceeds ${28 + team.id}°C.`, 
+        validate: (code, team) => { const temp = 28 + team.id; return code.includes("Serial.print") && code.includes(`${temp}`); } 
     },
     { 
-        title: "Sentry Acknowledge", 
-        desc: "Physically acknowledge the IR intrusion alert at the station.", 
-        challenge: (team) => `When IR Sensor (D8) triggers, the Buzzer must stay ON until the Physical Button (D0) is pressed. Print 'SEC_ACK_${team.id}'.`, 
-        validate: (code, team) => code.includes("D8") && code.includes("D0") && code.includes(`SEC_ACK_${team.id}`) 
+        title: "The Trace", 
+        desc: "Find the hidden frequency in the electromagnetic spectrum.", 
+        lore: "A faint signal is bouncing off the ionosphere. We need to trace its source using the light-sensitive array.",
+        docs: "Use an LDR (Light Dependent Resistor). Map the light intensity using <code>map(val, 0, 1023, 0, 100)</code>.",
+        challenge: (team) => `Signal Trace: Map your LDR intensity to a scale of 0-100. Trigger a pulse when intensity hits ${70 + team.id}.`, 
+        validate: (code, team) => { const ldr = 70 + team.id; return code.includes("map") && code.includes(`${ldr}`); } 
     },
     { 
-        title: "Void Uplink", 
-        desc: "Establish a secure Blynk cloud telemetry uplink.", 
-        challenge: (team) => `Send Humidity to Blynk Virtual Pin V${team.id + 1} every 2 seconds.`, 
-        validate: (code, team) => code.includes("Blynk.virtualWrite") && code.includes(`V${team.id + 1}`) 
+        title: "Uplink", 
+        desc: "Establish a secure connection to the command center.", 
+        lore: "The local systems are online, but we are still isolated. We need to bridge the gap between this island and the orbital command.",
+        docs: "Use the <code>BlynkSimpleEsp8266</code> library. Ensure your Auth Token and WiFi credentials are correct.",
+        challenge: (team) => `Global Link: Successfully connect to the Blynk Cloud. Set your Virtual Pin (V1) to ${100 + team.id}.`, 
+        validate: (code, team) => { const v = 100 + team.id; return code.includes("Blynk.begin") && code.includes(`V1`) && code.includes(`${v}`); } 
     },
     { 
-        title: "The Last Beacon", 
-        desc: "Double-key handshake required for final rescue launch.", 
-        challenge: (team) => `Print '[${team.name}]: BEACON_LAUNCH' only if BOTH the Physical Button (D0) AND the Blynk Button (V10) are pressed.`, 
-        validate: (code, team) => code.includes("digitalRead(D0)") && code.includes("BLYNK_WRITE(V10)") && code.includes("BEACON_LAUNCH") 
+        title: "The Beacon", 
+        desc: "Full system synchronization and rescue transmission.", 
+        lore: "This is it. The final sequence. All systems are green. Synchronize the pulse of the beacon with the heart of the team.",
+        docs: "Combine all previous logic. Final transmission must include the 'BEACON_ACTIVE' flag and the team's unique signature.",
+        challenge: (team) => `Final Pulse: Synchronize a fading LED pulse with your Blynk dashboard. Flag: 'BEACON_ACTIVE_${team.id}'.`, 
+        validate: (code, team) => { return code.includes("Blynk.run") && code.includes(`BEACON_ACTIVE_${team.id}`); } 
     }
 ];
 
 // --- State ---
 let teams = [], scene, camera, renderer, labelRenderer, composer, controls;
 let tower, island, sea, beacon, particles, finalBeam, currentTeam = null;
-let sessionCode = null;
+let sessionCode = null, isHost = false, myTeamId = null, myTeamToken = null;
 const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let audioContext;
 
@@ -88,16 +104,38 @@ document.getElementById('join-mode-btn').onclick = () => {
 };
 
 document.getElementById('start-host-btn').onclick = () => {
+    isHost = true;
     sessionCode = Math.floor(1000 + Math.random() * 9000).toString();
     const count = parseInt(document.getElementById('team-count').value);
     const shuffled = [...TEAM_NAMES_POOL].sort(() => 0.5 - Math.random());
-    const teamData = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0 }));
+    const teamData = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0, claimed: false }));
     initSupabaseSync(sessionCode, teamData);
 };
 
-document.getElementById('start-join-btn').onclick = () => {
+document.getElementById('check-code-btn').onclick = () => {
     const code = document.getElementById('session-code').value;
-    if (code.length === 4) initSupabaseSync(code, []);
+    if (code.length === 4) {
+        sessionCode = code;
+        initSupabaseSync(code, []);
+    }
+};
+
+document.getElementById('start-join-btn').onclick = () => {
+    const sel = document.getElementById('team-selector');
+    if (sel.value !== "") {
+        myTeamId = parseInt(sel.value);
+        myTeamToken = Math.random().toString(36).substring(7);
+        localStorage.setItem(`beacon_token_${sessionCode}`, myTeamToken);
+        localStorage.setItem(`beacon_team_${sessionCode}`, myTeamId);
+        
+        channel.send({
+            type: 'broadcast',
+            event: 'claim_team',
+            payload: { teamId: myTeamId, token: myTeamToken }
+        });
+        
+        initDashboard(teams);
+    }
 };
 
 function initSupabaseSync(code, initialTeams) {
@@ -114,41 +152,129 @@ function initSupabaseSync(code, initialTeams) {
             if (teams[teamId]) updateLocalProgress(teams[teamId], progress);
         })
         .on('broadcast', { event: 'init_game' }, ({ payload }) => {
-            if (teams.length === 0) initDashboard(payload.teams);
+            if (teams.length === 0) {
+                teams = payload.teams;
+                updateTeamSelector(payload.teams);
+                document.getElementById('team-select-zone').classList.remove('hidden');
+            }
         })
         .on('broadcast', { event: 'request_state' }, () => {
-            if (initialTeams.length > 0 || teams.length > 0) { // If I am the Host
+            if (isHost) {
                 channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: teams } });
+            }
+        })
+        .on('broadcast', { event: 'claim_team' }, ({ payload }) => {
+            if (teams[payload.teamId]) {
+                teams[payload.teamId].claimed = true;
+                if (isHost) updateTeamSelector(teams); // Update host list if needed
             }
         })
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
                 if (initialTeams.length > 0) {
-                    channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: initialTeams } });
                     initDashboard(initialTeams);
+                    channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: initialTeams } });
                 } else {
-                    // Participant: Request state from host
                     channel.send({ type: 'broadcast', event: 'request_state', payload: {} });
-                    document.getElementById('current-code').innerText = "SYNCING...";
                 }
             }
         });
 
-    document.getElementById('setup-screen').style.opacity = '0';
-    document.getElementById('dash-session-code').innerText = code;
-    setTimeout(() => { document.getElementById('setup-screen').classList.add('hidden'); }, 1000);
+    document.getElementById('current-code').innerText = code;
+    document.getElementById('session-display').classList.remove('hidden');
+}
+
+function updateTeamSelector(teamData) {
+    const sel = document.getElementById('team-selector');
+    sel.innerHTML = '<option value="">-- SELECT TEAM --</option>';
+    teamData.forEach(t => {
+        if (!t.claimed) {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.name;
+            sel.appendChild(opt);
+        }
+    });
 }
 
 function initDashboard(teamData) {
-    if (teams.length > 0) return;
-    document.getElementById('dashboard').classList.remove('hidden');
-    teams = teamData.map(t => ({ ...t, node: null, diamond: null }));
+    document.getElementById('setup-screen').style.opacity = '0';
+    document.getElementById('dash-session-code').innerText = sessionCode;
     
-    setupThreeJS();
-    setupInteractions();
-    renderTeamList();
-    startAriaLog();
-    cinematicIntro();
+    setTimeout(() => { 
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        teams = teamData.map(t => ({ ...t, node: (teams[t.id] ? teams[t.id].node : null), diamond: (teams[t.id] ? teams[t.id].diamond : null) }));
+        
+        if (!scene) {
+            setupThreeJS();
+            setupInteractions();
+            renderTeamList();
+            startAriaLog();
+            cinematicIntro();
+        }
+    }, 1000);
+}
+
+function setupInteractions() {
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    window.addEventListener('click', () => {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(teams.map(t => t.diamond).filter(d => d));
+        if (intersects.length > 0) {
+            const team = teams.find(t => t.diamond === intersects[0].object);
+            if (team.progress < 7) openBriefing(team);
+        }
+    });
+
+    document.getElementById('close-modal').onclick = () => document.getElementById('briefing-modal').classList.add('hidden');
+    document.getElementById('verify-btn').onclick = () => {
+        const code = document.getElementById('code-input').value;
+        const msg = document.getElementById('validation-msg');
+        if (MISSIONS[currentTeam.progress].validate(code, currentTeam)) {
+            msg.className = 'success-msg';
+            msg.innerText = "INTEGRITY VERIFIED. SYNCING...";
+            updateProgress(currentTeam, currentTeam.progress + 1);
+            setTimeout(() => document.getElementById('briefing-modal').classList.add('hidden'), 1500);
+        } else {
+            msg.className = 'error-msg';
+            msg.innerText = "VALIDATION FAILED: LOGIC MISMATCH.";
+        }
+    };
+
+    // Tab Logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            btn.classList.add('active');
+            const target = btn.getAttribute('data-tab');
+            if (target) document.getElementById(target).classList.remove('hidden');
+        };
+    });
+
+    // Roadmap Logic
+    document.getElementById('roadmap-btn').onclick = () => {
+        const overlay = document.getElementById('roadmap-overlay');
+        overlay.classList.toggle('hidden');
+        if (!overlay.classList.contains('hidden')) renderRoadmap();
+    };
+    document.getElementById('close-roadmap').onclick = () => document.getElementById('roadmap-overlay').classList.add('hidden');
+}
+
+function renderRoadmap() {
+    const items = document.querySelectorAll('.roadmap-item');
+    const teamProgress = (myTeamId !== null) ? teams[myTeamId].progress : 0;
+    
+    items.forEach((item, i) => {
+        item.classList.remove('active', 'completed');
+        if (i < teamProgress) item.classList.add('completed');
+        else if (i === teamProgress) item.classList.add('active');
+    });
 }
 
 function setupThreeJS() {
@@ -264,41 +390,34 @@ function setupThreeJS() {
     animate();
 }
 
-function setupInteractions() {
-    window.addEventListener('click', (e) => {
-        mouse.x = (e.clientX/window.innerWidth)*2-1; mouse.y = -(e.clientY/window.innerHeight)*2+1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(teams.map(t => t.diamond));
-        if (intersects.length > 0) {
-            currentTeam = teams.find(t => t.diamond === intersects[0].object);
-            if (currentTeam.progress < 7) openBriefing(currentTeam);
-        }
-    });
-    document.getElementById('close-modal').onclick = () => document.getElementById('briefing-modal').classList.add('hidden');
-    document.getElementById('submit-code').onclick = () => {
-        const code = document.getElementById('code-input').value;
-        const m = MISSIONS[currentTeam.progress];
-        const res = document.getElementById('validation-msg');
-        if (m.validate(code, currentTeam)) {
-            res.className = "success-msg"; res.innerText = "VERIFIED. SYNCING..."; playSound(880, 'sine', 0.2);
-            setTimeout(() => { 
-                document.getElementById('briefing-modal').classList.add('hidden');
-                updateProgress(currentTeam, currentTeam.progress + 1);
-            }, 1000);
-        } else {
-            res.className = "error-msg"; res.innerText = "LOGIC ERROR. CHECK CHALLENGE."; playSound(150, 'sawtooth', 0.4);
-        }
-    };
-}
 
 function openBriefing(t) {
+    if (!isHost && myTeamId !== null && myTeamId !== t.id && !isAdmin) {
+        speak("Access Denied. Unauthorized secure link attempt.");
+        const log = document.getElementById('log-content');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry error-msg';
+        entry.innerText = `> CRITICAL: Unauthorized access attempt on ${t.name} node.`;
+        log.prepend(entry);
+        return;
+    }
+
     const m = MISSIONS[t.progress];
     document.getElementById('modal-team-name').innerText = t.name;
     document.getElementById('modal-mission-num').innerText = t.progress + 1;
-    document.getElementById('mission-desc').innerText = m.desc;
     document.getElementById('mission-challenge').innerText = m.challenge(t);
+    document.getElementById('mission-lore').innerText = m.lore;
+    document.getElementById('mission-tech').innerHTML = m.docs;
+    
     document.getElementById('validation-msg').innerText = "";
     document.getElementById('code-input').value = "";
+    
+    // Reset tabs
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.querySelector('[data-tab="tab-mission"]').classList.add('active');
+    document.getElementById('tab-mission').classList.remove('hidden');
+    
     document.getElementById('briefing-modal').classList.remove('hidden');
     playSound(600, 'square', 0.1, 0.05);
 }
