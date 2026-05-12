@@ -5,8 +5,23 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import * as TWEEN from '@tweenjs/tween.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 // --- Configuration & Constants ---
+// [ FACILITATOR ACTION REQUIRED ]: Paste your Firebase Config here!
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "XXXX",
+    appId: "XXXX"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 const COLORS = { cyan: 0x00ffcc, blue: 0x0066ff, obsidian: 0x0a192f, bg: 0x050505 };
 const TEAM_NAMES_POOL = ["Vajra Vanguard", "Agni Archers", "Marut Warriors", "Gaja Guardians", "Trishul Titans", "Rudra Raiders", "Surya Sentinels", "Chandra Charioteers", "Naga Knights", "Garuda Gliders", "Indra Interceptors", "Vayu Voyagers", "Yama Yanntras", "Varuna Vikings", "Soma Strykers", "Kalki Kalas", "Bhairav Battalion", "Shakti Squad", "Brahma Bots", "Vishnu Victors", "Shiva Shrapnels", "Dhruva Drifters", "Nakshatra Navigators", "Akasha Aviators", "Prithvi Pioneers", "Jala Jets", "Tejas Troopers", "Vyom Veterans", "Agastya Alchemists", "Markandeya Mavericks"];
 const ARIA_MESSAGES = ["Thermal Core Stable", "Sector 7 Intruder Detected", "Pressure Valve Optimized", "Manual Override Engaged", "Atmosphere Stabilization at 85%", "Radar Calibration Pending", "Beacon Pulse Detected", "Power Grid Synchronized", "Security Breach in Sector 4", "Oxygen Recirculation Active", "Magnetic Field Verified", "Quantum Link established"];
@@ -61,6 +76,7 @@ const MISSIONS = [
 // --- State ---
 let teams = [], scene, camera, renderer, labelRenderer, composer, controls;
 let tower, island, sea, beacon, particles, finalBeam, currentTeam = null;
+let sessionCode = null;
 const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let audioContext;
 
@@ -68,20 +84,71 @@ let audioContext;
 const playSound = (f, t, d, v = 0.1) => { if (!audioContext) return; const o = audioContext.createOscillator(), g = audioContext.createGain(); o.type = t; o.frequency.setValueAtTime(f, audioContext.currentTime); g.gain.setValueAtTime(v, audioContext.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + d); o.connect(g); g.connect(audioContext.destination); o.start(); o.stop(audioContext.currentTime + d); };
 const speak = (t) => { const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; u.pitch = 0.5; window.speechSynthesis.speak(u); };
 
-// --- Initialization ---
-document.getElementById('start-btn').onclick = () => {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const count = parseInt(document.getElementById('team-count').value);
-    if (count > 0 && count <= 30) {
-        document.getElementById('setup-screen').style.opacity = '0';
-        setTimeout(() => { document.getElementById('setup-screen').classList.add('hidden'); initDashboard(count); }, 1000);
-    }
+// --- Initialization & Sync ---
+document.getElementById('host-mode-btn').onclick = () => {
+    document.getElementById('setup-main').classList.add('hidden');
+    document.getElementById('host-config').classList.remove('hidden');
 };
 
-function initDashboard(count) {
-    document.getElementById('dashboard').classList.remove('hidden');
+document.getElementById('join-mode-btn').onclick = () => {
+    document.getElementById('setup-main').classList.add('hidden');
+    document.getElementById('join-config').classList.remove('hidden');
+};
+
+document.getElementById('start-host-btn').onclick = () => {
+    sessionCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const count = parseInt(document.getElementById('team-count').value);
+    
     const shuffled = [...TEAM_NAMES_POOL].sort(() => 0.5 - Math.random());
-    teams = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0, node: null, diamond: null, link: null }));
+    const teamData = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0 }));
+    
+    set(ref(db, 'sessions/' + sessionCode), {
+        count: count,
+        teams: teamData,
+        lastUpdate: Date.now()
+    }).then(() => {
+        startSession(sessionCode, teamData);
+    });
+};
+
+document.getElementById('start-join-btn').onclick = () => {
+    const code = document.getElementById('session-code').value;
+    onValue(ref(db, 'sessions/' + code), (snapshot) => {
+        const data = snapshot.val();
+        if (data && !sessionCode) {
+            startSession(code, data.teams);
+        }
+    }, { onlyOnce: true });
+};
+
+function startSession(code, teamData) {
+    sessionCode = code;
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    document.getElementById('setup-screen').style.opacity = '0';
+    document.getElementById('current-code').innerText = code;
+    document.getElementById('session-display').classList.remove('hidden');
+    
+    setTimeout(() => { 
+        document.getElementById('setup-screen').classList.add('hidden'); 
+        initDashboard(teamData); 
+    }, 1000);
+
+    // Listen for Global Updates
+    onValue(ref(db, 'sessions/' + sessionCode + '/teams'), (snapshot) => {
+        const remoteTeams = snapshot.val();
+        if (remoteTeams) {
+            remoteTeams.forEach((rt, i) => {
+                if (teams[i] && teams[i].progress !== rt.progress) {
+                    updateLocalProgress(teams[i], rt.progress);
+                }
+            });
+        }
+    });
+}
+
+function initDashboard(teamData) {
+    document.getElementById('dashboard').classList.remove('hidden');
+    teams = teamData.map(t => ({ ...t, node: null, diamond: null }));
     
     setupThreeJS();
     setupInteractions();
@@ -243,9 +310,19 @@ function openBriefing(t) {
 }
 
 function updateProgress(t, p) {
+    if (sessionCode) {
+        update(ref(db, `sessions/${sessionCode}/teams/${t.id}`), { progress: p });
+    }
+    updateLocalProgress(t, p);
+}
+
+function updateLocalProgress(t, p) {
     t.progress = p;
     const c = PROGRESS_COLORS[p];
-    t.diamond.material.color.set(c); t.diamond.material.emissive.set(c);
+    if (t.diamond) {
+        t.diamond.material.color.set(c); 
+        t.diamond.material.emissive.set(c);
+    }
     renderTeamList();
     updateGlobalStatus();
     speak(`${t.name} synchronized for phase ${p}.`);
