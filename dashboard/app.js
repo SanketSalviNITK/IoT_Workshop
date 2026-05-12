@@ -260,7 +260,9 @@ function initDashboard(teamData) {
     
     setTimeout(() => { 
         document.getElementById('setup-screen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
+        const dash = document.getElementById('dashboard');
+        dash.classList.remove('hidden');
+        setTimeout(() => dash.style.opacity = '1', 50); // Trigger fade-in
         teams = teamData.map(t => ({ ...t, node: (teams[t.id] ? teams[t.id].node : null), diamond: (teams[t.id] ? teams[t.id].diamond : null) }));
         
         if (!scene) {
