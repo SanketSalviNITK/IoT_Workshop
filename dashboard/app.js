@@ -138,6 +138,63 @@ document.getElementById('start-join-btn').onclick = () => {
     }
 };
 
+const CERT_QUESTIONS = [
+    { q: "Which function is used to read an LDR sensor connected to Analog pin A0?", a: ["digitalRead()", "analogRead()", "Serial.print()"], c: 1 },
+    { q: "In Blynk.begin(auth, ssid, pass), what does 'ssid' represent?", a: ["Your Auth Token", "Your WiFi Network Name", "Your Team ID"], c: 1 },
+    { q: "To make an LED blink every 0.5 seconds, delay() should be?", a: ["50", "500", "5000"], c: 1 },
+    { q: "Which protocol did we use for real-time dashboard updates?", a: ["HTTP Request", "Supabase Broadcast", "USB Serial"], c: 1 },
+    { q: "What is the standard baud rate for ESP8266 Serial communication?", a: ["9600", "115200", "1200"], c: 1 }
+];
+
+let currentQuestion = 0, examScore = 0;
+
+function startExam() {
+    currentQuestion = 0; examScore = 0;
+    document.getElementById('exam-modal').classList.remove('hidden');
+    loadQuestion();
+}
+
+function loadQuestion() {
+    const q = CERT_QUESTIONS[currentQuestion];
+    document.getElementById('question-text').innerText = q.q;
+    document.getElementById('exam-progress').innerText = `Question ${currentQuestion + 1} of ${CERT_QUESTIONS.length}`;
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = '';
+    q.a.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(i);
+        grid.appendChild(btn);
+    });
+}
+
+function checkAnswer(idx) {
+    if (idx === CERT_QUESTIONS[currentQuestion].c) examScore++;
+    currentQuestion++;
+    if (currentQuestion < CERT_QUESTIONS.length) {
+        loadQuestion();
+    } else {
+        finishExam();
+    }
+}
+
+function finishExam() {
+    document.getElementById('exam-modal').classList.add('hidden');
+    if (examScore >= 4) {
+        speak("Certification Exam Passed. Generating secure credentials.");
+        showCertificate();
+    } else {
+        speak("Certification Failed. Integrity score insufficient. Retry mission.");
+        alert(`Score: ${examScore}/${CERT_QUESTIONS.length}. You need 4/5 to pass.`);
+    }
+}
+
+function showCertificate() {
+    document.getElementById('certificate-modal').classList.remove('hidden');
+    document.getElementById('final-cert-name').innerText = teams[myTeamId].name;
+}
+
 function initSupabaseSync(code, initialTeams) {
     sessionCode = code;
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -264,6 +321,16 @@ function setupInteractions() {
         if (!overlay.classList.contains('hidden')) renderRoadmap();
     };
     document.getElementById('close-roadmap').onclick = () => document.getElementById('roadmap-overlay').classList.add('hidden');
+
+    // Panel Toggle Logic
+    document.getElementById('toggle-mission-panel').onclick = () => {
+        document.getElementById('mission-panel').classList.toggle('collapsed');
+    };
+
+    document.getElementById('close-exam').onclick = () => document.getElementById('exam-modal').classList.add('hidden');
+    document.getElementById('download-cert-btn').onclick = () => {
+        window.print(); // Simple way to save the certificate as PDF
+    };
 }
 
 function renderRoadmap() {
@@ -463,6 +530,17 @@ function renderTeamList() {
             </div>`;
         l.appendChild(row);
     });
+
+    // Certification Button for Local Team
+    if (myTeamId !== null && teams[myTeamId] && teams[myTeamId].progress === 7) {
+        const certBtn = document.createElement('button');
+        certBtn.id = 'start-exam-btn';
+        certBtn.className = 'big-btn';
+        certBtn.style.marginTop = '20px';
+        certBtn.innerText = '🎓 START CERTIFICATION EXAM';
+        certBtn.onclick = startExam;
+        l.appendChild(certBtn);
+    }
 
     // Admin Override: Clicking segments manually updates progress
     document.querySelectorAll('.segment').forEach(seg => {

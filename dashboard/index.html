@@ -100,10 +100,46 @@
                     <div class="roadmap-item" data-m="6">7. THE BEACON</div>
                 </div>
             </div>
+
+            <div id="exam-modal" class="panel hidden">
+                <div class="panel-header">
+                    <span class="glitch-text" data-text="CERTIFICATION EXAM">CERTIFICATION EXAM</span>
+                    <button id="close-exam">×</button>
+                </div>
+                <div id="exam-content">
+                    <p class="mission-tag">TOPIC: IOT ARCHITECTURE & LOGIC</p>
+                    <div id="question-container">
+                        <h3 id="question-text">Question goes here?</h3>
+                        <div id="options-grid"></div>
+                    </div>
+                    <div id="exam-progress">Question 1 of 5</div>
+                </div>
+            </div>
+
+            <div id="certificate-modal" class="panel hidden">
+                <div class="victory-content">
+                    <h1 class="glitch-text" data-text="MASTER CERTIFIED">MASTER CERTIFIED</h1>
+                    <div id="certificate-preview">
+                        <div class="cert-frame">
+                            <div class="cert-title">THE LAST BEACON</div>
+                            <div class="cert-award">CERTIFICATE OF MERIT</div>
+                            <div class="cert-to">Awarded to</div>
+                            <div class="cert-name" id="final-cert-name">Agni Archers</div>
+                            <div class="cert-desc">For demonstrating mastery in IoT Hardware and Cloud Logic.</div>
+                            <div class="cert-footer">
+                                <span>ARI-A SYSTEM AI</span>
+                                <span>COMMANDER [USER]</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="download-cert-btn">📥 DOWNLOAD CERTIFICATE</button>
+                </div>
+            </div>
             <!-- Left Panel: Mission Status -->
             <div id="mission-panel" class="panel">
                 <div class="panel-header">
                     <span class="glitch-text" data-text="MISSION STATUS">MISSION STATUS</span>
+                    <button id="toggle-mission-panel">▲</button>
                 </div>
                 <div id="team-list">
                     <!-- Teams will be injected here -->
