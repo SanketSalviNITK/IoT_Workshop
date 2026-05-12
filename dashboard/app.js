@@ -5,24 +5,15 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import * as TWEEN from '@tweenjs/tween.js';
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 // --- Configuration & Constants ---
-// [ FACILITATOR ACTION REQUIRED ]: Paste your Firebase Config here!
-const firebaseConfig = {
-  apiKey: "AIzaSyAWwh6Xjk60yBZwzYQz5mWg1xcsEN2KZhA",
-  authDomain: "iot-workshop-111cd.firebaseapp.com",
-  projectId: "iot-workshop-111cd",
-  databaseURL: "https://iot-workshop-111cd-default-rtdb.asia-southeast1.firebasedatabase.app/",
-  storageBucket: "iot-workshop-111cd.firebasestorage.app",
-  messagingSenderId: "518123993317",
-  appId: "1:518123993317:web:1f124df6ec5f9fe5283c0c",
-  measurementId: "G-TC71SYC273"
-};
+// [ FACILITATOR ACTION REQUIRED ]: Paste your Supabase details here!
+const SUPABASE_URL = "https://ppreqzqzftogctijyzqx.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_a9GAAtqed7CJ5WxFLAFVPg_0JgXBVqh";
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let channel = null;
 const COLORS = { cyan: 0x00ffcc, blue: 0x0066ff, obsidian: 0x0a192f, bg: 0x050505 };
 const TEAM_NAMES_POOL = ["Vajra Vanguard", "Agni Archers", "Marut Warriors", "Gaja Guardians", "Trishul Titans", "Rudra Raiders", "Surya Sentinels", "Chandra Charioteers", "Naga Knights", "Garuda Gliders", "Indra Interceptors", "Vayu Voyagers", "Yama Yanntras", "Varuna Vikings", "Soma Strykers", "Kalki Kalas", "Bhairav Battalion", "Shakti Squad", "Brahma Bots", "Vishnu Victors", "Shiva Shrapnels", "Dhruva Drifters", "Nakshatra Navigators", "Akasha Aviators", "Prithvi Pioneers", "Jala Jets", "Tejas Troopers", "Vyom Veterans", "Agastya Alchemists", "Markandeya Mavericks"];
 const ARIA_MESSAGES = ["Thermal Core Stable", "Sector 7 Intruder Detected", "Pressure Valve Optimized", "Manual Override Engaged", "Atmosphere Stabilization at 85%", "Radar Calibration Pending", "Beacon Pulse Detected", "Power Grid Synchronized", "Security Breach in Sector 4", "Oxygen Recirculation Active", "Magnetic Field Verified", "Quantum Link established"];
@@ -99,55 +90,51 @@ document.getElementById('join-mode-btn').onclick = () => {
 document.getElementById('start-host-btn').onclick = () => {
     sessionCode = Math.floor(1000 + Math.random() * 9000).toString();
     const count = parseInt(document.getElementById('team-count').value);
-    
     const shuffled = [...TEAM_NAMES_POOL].sort(() => 0.5 - Math.random());
     const teamData = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0 }));
-    
-    set(ref(db, 'sessions/' + sessionCode), {
-        count: count,
-        teams: teamData,
-        lastUpdate: Date.now()
-    }).then(() => {
-        startSession(sessionCode, teamData);
-    });
+    initSupabaseSync(sessionCode, teamData);
 };
 
 document.getElementById('start-join-btn').onclick = () => {
     const code = document.getElementById('session-code').value;
-    onValue(ref(db, 'sessions/' + code), (snapshot) => {
-        const data = snapshot.val();
-        if (data && !sessionCode) {
-            startSession(code, data.teams);
-        }
-    }, { onlyOnce: true });
+    if (code.length === 4) initSupabaseSync(code, []);
 };
 
-function startSession(code, teamData) {
+function initSupabaseSync(code, initialTeams) {
     sessionCode = code;
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    channel = supabase.channel(`session_${sessionCode}`, {
+        config: { broadcast: { self: true } }
+    });
+
+    channel
+        .on('broadcast', { event: 'progress_update' }, ({ payload }) => {
+            const { teamId, progress } = payload;
+            if (teams[teamId]) updateLocalProgress(teams[teamId], progress);
+        })
+        .on('broadcast', { event: 'init_game' }, ({ payload }) => {
+            if (teams.length === 0) initDashboard(payload.teams);
+        })
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                if (initialTeams.length > 0) {
+                    channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: initialTeams } });
+                    initDashboard(initialTeams);
+                } else {
+                    document.getElementById('current-code').innerText = "SYNCING...";
+                }
+            }
+        });
+
     document.getElementById('setup-screen').style.opacity = '0';
     document.getElementById('current-code').innerText = code;
     document.getElementById('session-display').classList.remove('hidden');
-    
-    setTimeout(() => { 
-        document.getElementById('setup-screen').classList.add('hidden'); 
-        initDashboard(teamData); 
-    }, 1000);
-
-    // Listen for Global Updates
-    onValue(ref(db, 'sessions/' + sessionCode + '/teams'), (snapshot) => {
-        const remoteTeams = snapshot.val();
-        if (remoteTeams) {
-            remoteTeams.forEach((rt, i) => {
-                if (teams[i] && teams[i].progress !== rt.progress) {
-                    updateLocalProgress(teams[i], rt.progress);
-                }
-            });
-        }
-    });
+    setTimeout(() => { document.getElementById('setup-screen').classList.add('hidden'); }, 1000);
 }
 
 function initDashboard(teamData) {
+    if (teams.length > 0) return;
     document.getElementById('dashboard').classList.remove('hidden');
     teams = teamData.map(t => ({ ...t, node: null, diamond: null }));
     
@@ -311,8 +298,12 @@ function openBriefing(t) {
 }
 
 function updateProgress(t, p) {
-    if (sessionCode) {
-        update(ref(db, `sessions/${sessionCode}/teams/${t.id}`), { progress: p });
+    if (channel) {
+        channel.send({
+            type: 'broadcast',
+            event: 'progress_update',
+            payload: { teamId: t.id, progress: p }
+        });
     }
     updateLocalProgress(t, p);
 }
