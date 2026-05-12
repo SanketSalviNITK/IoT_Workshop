@@ -11,13 +11,14 @@ import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/
 // --- Configuration & Constants ---
 // [ FACILITATOR ACTION REQUIRED ]: Paste your Firebase Config here!
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "XXXX",
-    appId: "XXXX"
+  apiKey: "AIzaSyAWwh6Xjk60yBZwzYQz5mWg1xcsEN2KZhA",
+  authDomain: "iot-workshop-111cd.firebaseapp.com",
+  projectId: "iot-workshop-111cd",
+  databaseURL: "https://iot-workshop-111cd-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  storageBucket: "iot-workshop-111cd.firebasestorage.app",
+  messagingSenderId: "518123993317",
+  appId: "1:518123993317:web:1f124df6ec5f9fe5283c0c",
+  measurementId: "G-TC71SYC273"
 };
 
 const app = initializeApp(firebaseConfig);
