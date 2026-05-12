@@ -414,6 +414,24 @@ button:hover {
 }
 
 .roadmap-item.completed { border-color: var(--cyan); color: var(--cyan); opacity: 1; }
+.source-link {
+    color: var(--cyan);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 1px solid var(--cyan);
+    padding: 5px 10px;
+    background: rgba(0,255,204,0.05);
+    transition: 0.3s;
+    display: inline-block;
+    letter-spacing: 1px;
+}
+
+.source-link:hover {
+    background: var(--cyan);
+    color: black;
+    box-shadow: 0 0 15px var(--cyan);
+}
 .roadmap-item.active { border-color: var(--blue); color: var(--blue); opacity: 1; border-style: dashed; }
 
 @keyframes noise-anim {

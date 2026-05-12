@@ -37,7 +37,15 @@
                 <div class="input-group">
                     <label for="session-code">ENTER 4-DIGIT SESSION CODE:</label>
                     <input type="text" id="session-code" placeholder="XXXX" maxlength="4">
-                    <button id="start-join-btn">SYNC TO MISSION</button>
+                    <button id="check-code-btn">FETCH TEAM LIST</button>
+                    
+                    <div id="team-select-zone" class="hidden">
+                        <label for="team-selector">SELECT YOUR ASSIGNED TEAM:</label>
+                        <select id="team-selector">
+                            <option value="">-- SELECT TEAM --</option>
+                        </select>
+                        <button id="start-join-btn">ESTABLISH SECURE LINK</button>
+                    </div>
                 </div>
             </div>
             
@@ -48,19 +56,48 @@
         <div id="dashboard" class="hidden">
             <!-- Mission Briefing Modal -->
             <div id="briefing-modal" class="panel hidden">
-                <div class="panel-header">
-                    <span id="modal-team-name">TEAM NAME</span>: MISSION <span id="modal-mission-num">1</span>
+                <div class="modal-tabs">
+                    <button class="tab-btn active" data-tab="tab-mission">MISSION</button>
+                    <button class="tab-btn" data-tab="tab-intel">INTEL</button>
+                    <button class="tab-btn" data-tab="tab-tech">TECH</button>
                     <button id="close-modal">×</button>
                 </div>
-                <div id="briefing-content">
-                    <p id="mission-desc">Mission description goes here...</p>
-                    <div class="challenge-box">
-                        <strong>YOUR UNIQUE CHALLENGE:</strong>
-                        <p id="mission-challenge">Challenge details...</p>
-                    </div>
-                    <textarea id="code-input" placeholder="PASTE YOUR CODE SNIPPET HERE..."></textarea>
+                
+                <div id="tab-mission" class="tab-content">
+                    <h2 id="modal-team-name">Team Name</h2>
+                    <p class="mission-tag">OBJECTIVE: MISSION <span id="modal-mission-num">0</span></p>
+                    <div id="mission-challenge" class="challenge-box">Challenge Details...</div>
+                    <textarea id="code-input" placeholder="PASTE YOUR loop() CODE HERE..."></textarea>
                     <div id="validation-msg"></div>
-                    <button id="submit-code">VERIFY INTEGRITY</button>
+                    <button id="verify-btn">VERIFY INTEGRITY</button>
+                </div>
+
+                <div id="tab-intel" class="tab-content hidden">
+                    <h3>MISSION LORE</h3>
+                    <div id="mission-lore" class="lore-text">Lore content here...</div>
+                </div>
+
+                <div id="tab-tech" class="tab-content hidden">
+                    <h3>TECHNICAL SPECS</h3>
+                    <div id="mission-tech" class="tech-docs">Technical documentation here...</div>
+                </div>
+            </div>
+
+            <button id="roadmap-btn">🗺️ CAMPAIGN ROADMAP</button>
+
+            <div id="roadmap-overlay" class="panel hidden">
+                <div class="panel-header">
+                    MISSION ROADMAP
+                    <button id="close-roadmap">×</button>
+                </div>
+                <div class="roadmap-grid">
+                    <div class="roadmap-item" data-m="0">1. THE SPARK</div>
+                    <div class="roadmap-item" data-m="1">2. IGNITION</div>
+                    <div class="roadmap-item" data-m="2">3. SHIELD</div>
+                    <div class="roadmap-item" data-m="3">4. CLIMATE</div>
+                    <div class="roadmap-item" data-m="4">5. TRACE</div>
+                    <div class="roadmap-item" data-m="5">6. UPLINK</div>
+                    <div class="roadmap-item" data-m="6">7. THE BEACON</div>
                 </div>
             </div>
             <!-- Left Panel: Mission Status -->
@@ -112,6 +149,6 @@
             }
         }
     </script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="./app.js"></script>
 </body>
 </html>

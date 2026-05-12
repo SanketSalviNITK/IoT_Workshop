@@ -27,7 +27,7 @@ const MISSIONS = [
         title: "The Spark", 
         desc: "Initialize the emergency beacon's status lights.", 
         lore: "The Great Dark has arrived. Sector 7's primary power is gone. We need to jumpstart the status LEDs to signal the rescue fleet. Without light, we are invisible.",
-        docs: "Use <code>digitalWrite(D1, HIGH)</code> and <code>delay(ms)</code>. Ensure your pins (D1, D2) match the wiring directive.",
+        docs: "Use <code>digitalWrite(D1, HIGH)</code> and <code>delay(ms)</code>. Ensure your pins (D1, D2) match the wiring directive.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission1_spark' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Alternating Blink: Red (D1) and Green (D2). Set the delay to exactly ${150 + (team.id * 30)}ms.`, 
         validate: (code, team) => { const d = 150 + (team.id * 30); return code.includes("D1") && code.includes("D2") && code.includes(`delay(${d})`); } 
     },
@@ -35,7 +35,7 @@ const MISSIONS = [
         title: "Manual Ignition", 
         desc: "Build thermal pressure in the core using the physical ignition button.", 
         lore: "The fusion core is cold. Manual compression is required. You must hold the ignition sequence until the core stabilizes at critical mass.",
-        docs: "Check <code>digitalRead(D0)</code>. Use a <code>while</code> loop or <code>millis()</code> to track the duration. Output 'IGNITION_COMPLETE' to Serial.",
+        docs: "Check <code>digitalRead(D0)</code>. Use a <code>while</code> loop or <code>millis()</code> to track the duration. Output 'IGNITION_COMPLETE' to Serial.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission2_ignition' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Hold the Physical Button (D0) for exactly ${2 + team.id} seconds. Watch for 'IGNITION_COMPLETE'.`, 
         validate: (code, team) => { const wait = (2 + team.id) * 1000; return code.includes("D0") && code.includes("IGNITION_COMPLETE") && code.includes(`${wait}`); } 
     },
@@ -43,7 +43,7 @@ const MISSIONS = [
         title: "Sonic Shield", 
         desc: "Calibrate the proximity sensors to detect approaching debris.", 
         lore: "Asteroid fragments are closing in. Our sonar array is misaligned. Calibrate your proximity sensors to create a sonic perimeter.",
-        docs: "Use the Ultrasonic sensor (Trig/Echo). Distance = <code>(duration/2) / 29.1</code>. Target distance must be precise.",
+        docs: "Use the Ultrasonic sensor (Trig/Echo). Distance = <code>(duration/2) / 29.1</code>. Target distance must be precise.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission3_shield' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Distance Lock: Set your Ultrasonic sensor to trigger at exactly ${10 + (team.id * 2)}cm.`, 
         validate: (code, team) => { const dist = 10 + (team.id * 2); return code.includes("trig") && code.includes("echo") && code.includes(`${dist}`); } 
     },
@@ -51,7 +51,7 @@ const MISSIONS = [
         title: "Climate Control", 
         desc: "Stabilize the atmosphere by monitoring temperature fluctuations.", 
         lore: "Life support is failing. The oxygen scrubbers are overheating. Monitor the thermal fluctuations and engage the cooling fans.",
-        docs: "Use the DHT11 or Analog Temp sensor. Read values using <code>analogRead()</code> or the DHT library. Log data to the Serial Plotter.",
+        docs: "Use the DHT11 or Analog Temp sensor. Read values using <code>analogRead()</code> or the DHT library. Log data to the Serial Plotter.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission4_climate' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Thermal Sync: Log temperature data. Trigger a warning if the value exceeds ${28 + team.id}°C.`, 
         validate: (code, team) => { const temp = 28 + team.id; return code.includes("Serial.print") && code.includes(`${temp}`); } 
     },
@@ -59,7 +59,7 @@ const MISSIONS = [
         title: "The Trace", 
         desc: "Find the hidden frequency in the electromagnetic spectrum.", 
         lore: "A faint signal is bouncing off the ionosphere. We need to trace its source using the light-sensitive array.",
-        docs: "Use an LDR (Light Dependent Resistor). Map the light intensity using <code>map(val, 0, 1023, 0, 100)</code>.",
+        docs: "Use an LDR (Light Dependent Resistor). Map the light intensity using <code>map(val, 0, 1023, 0, 100)</code>.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission5_trace' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Signal Trace: Map your LDR intensity to a scale of 0-100. Trigger a pulse when intensity hits ${70 + team.id}.`, 
         validate: (code, team) => { const ldr = 70 + team.id; return code.includes("map") && code.includes(`${ldr}`); } 
     },
@@ -67,7 +67,7 @@ const MISSIONS = [
         title: "Uplink", 
         desc: "Establish a secure connection to the command center.", 
         lore: "The local systems are online, but we are still isolated. We need to bridge the gap between this island and the orbital command.",
-        docs: "Use the <code>BlynkSimpleEsp8266</code> library. Ensure your Auth Token and WiFi credentials are correct.",
+        docs: "Use the <code>BlynkSimpleEsp8266</code> library. Ensure your Auth Token and WiFi credentials are correct.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission6_uplink' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Global Link: Successfully connect to the Blynk Cloud. Set your Virtual Pin (V1) to ${100 + team.id}.`, 
         validate: (code, team) => { const v = 100 + team.id; return code.includes("Blynk.begin") && code.includes(`V1`) && code.includes(`${v}`); } 
     },
@@ -75,7 +75,7 @@ const MISSIONS = [
         title: "The Beacon", 
         desc: "Full system synchronization and rescue transmission.", 
         lore: "This is it. The final sequence. All systems are green. Synchronize the pulse of the beacon with the heart of the team.",
-        docs: "Combine all previous logic. Final transmission must include the 'BEACON_ACTIVE' flag and the team's unique signature.",
+        docs: "Combine all previous logic. Final transmission must include the 'BEACON_ACTIVE' flag and the team's unique signature.<br><br><a href='https://github.com/SanketSalviNITK/IoT_Workshop/tree/main/missions/mission7_beacon' target='_blank' class='source-link'>> VIEW MISSION SOURCE</a>",
         challenge: (team) => `Final Pulse: Synchronize a fading LED pulse with your Blynk dashboard. Flag: 'BEACON_ACTIVE_${team.id}'.`, 
         validate: (code, team) => { return code.includes("Blynk.run") && code.includes(`BEACON_ACTIVE_${team.id}`); } 
     }
