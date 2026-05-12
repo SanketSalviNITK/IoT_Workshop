@@ -268,9 +268,25 @@ function initDashboard(teamData) {
             setupInteractions();
             renderTeamList();
             startAriaLog();
-            cinematicIntro();
+            
+            if (!isHost) playCinematic();
+            else cinematicIntro();
         }
     }, 1000);
+}
+
+function playCinematic() {
+    document.getElementById('intro-overlay').classList.remove('hidden');
+    // Dramatic Camera Orbit
+    camera.position.set(200, 100, 200);
+    new TWEEN.Tween(camera.position).to({ x: 50, y: 40, z: 50 }, 20000).easing(TWEEN.Easing.Cubic.Out).start();
+    speak("Incoming transmission from Sector 7. Establish secure link to begin mission.");
+    
+    document.getElementById('skip-intro').onclick = () => {
+        document.getElementById('intro-overlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('intro-overlay').classList.add('hidden'), 1000);
+        speak("Link established. Beacon network active.");
+    };
 }
 
 function setupInteractions() {
