@@ -9,8 +9,8 @@
  */
 
 /* Fill-in your Template ID (from Blynk Device Info) */
-#define BLYNK_TEMPLATE_ID   "TMPL0000"
-#define BLYNK_TEMPLATE_NAME "TheLastBeacon"
+#define BLYNK_TEMPLATE_ID   "TMPL3UcPNunGU"
+#define BLYNK_TEMPLATE_NAME "weather "
 #define BLYNK_AUTH_TOKEN    "YourAuthToken"
 
 #include <ESP8266WiFi.h>

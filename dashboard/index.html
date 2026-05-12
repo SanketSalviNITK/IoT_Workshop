@@ -16,11 +16,32 @@
         <!-- Setup Screen -->
         <div id="setup-screen" class="panel">
             <h1>INITIATING MISSION CONTROL</h1>
-            <div class="input-group">
-                <label for="team-count">NUMBER OF BEACON TEAMS (1-30):</label>
-                <input type="number" id="team-count" min="1" max="30" value="5">
-                <button id="start-btn">ENGAGE SYSTEMS</button>
+            
+            <div id="setup-main">
+                <button id="host-mode-btn" class="big-btn">HOST NEW MISSION</button>
+                <div class="divider">OR</div>
+                <button id="join-mode-btn" class="big-btn secondary">JOIN EXISTING MISSION</button>
             </div>
+
+            <!-- Host Config (Hidden) -->
+            <div id="host-config" class="hidden">
+                <div class="input-group">
+                    <label for="team-count">NUMBER OF BEACON TEAMS (1-30):</label>
+                    <input type="number" id="team-count" min="1" max="30" value="5">
+                    <button id="start-host-btn">START GLOBAL SYNC</button>
+                </div>
+            </div>
+
+            <!-- Join Config (Hidden) -->
+            <div id="join-config" class="hidden">
+                <div class="input-group">
+                    <label for="session-code">ENTER 4-DIGIT SESSION CODE:</label>
+                    <input type="text" id="session-code" placeholder="XXXX" maxlength="4">
+                    <button id="start-join-btn">SYNC TO MISSION</button>
+                </div>
+            </div>
+            
+            <div id="session-display" class="hidden">SESSION CODE: <span id="current-code">----</span></div>
         </div>
 
         <!-- Dashboard Screen (Hidden initially) -->

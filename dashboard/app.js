@@ -116,12 +116,19 @@ function initSupabaseSync(code, initialTeams) {
         .on('broadcast', { event: 'init_game' }, ({ payload }) => {
             if (teams.length === 0) initDashboard(payload.teams);
         })
+        .on('broadcast', { event: 'request_state' }, () => {
+            if (initialTeams.length > 0 || teams.length > 0) { // If I am the Host
+                channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: teams } });
+            }
+        })
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
                 if (initialTeams.length > 0) {
                     channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: initialTeams } });
                     initDashboard(initialTeams);
                 } else {
+                    // Participant: Request state from host
+                    channel.send({ type: 'broadcast', event: 'request_state', payload: {} });
                     document.getElementById('current-code').innerText = "SYNCING...";
                 }
             }
