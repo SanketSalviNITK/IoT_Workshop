@@ -232,6 +232,19 @@ button:hover {
     transition: 1s;
 }
 
+#mission-session-info {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--blue);
+    opacity: 0.8;
+}
+
+#dash-session-code {
+    color: #fff;
+    font-weight: bold;
+}
+
 /* Victory Overlay */
 #victory-overlay {
     position: fixed;

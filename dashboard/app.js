@@ -135,8 +135,7 @@ function initSupabaseSync(code, initialTeams) {
         });
 
     document.getElementById('setup-screen').style.opacity = '0';
-    document.getElementById('current-code').innerText = code;
-    document.getElementById('session-display').classList.remove('hidden');
+    document.getElementById('dash-session-code').innerText = code;
     setTimeout(() => { document.getElementById('setup-screen').classList.add('hidden'); }, 1000);
 }
 
