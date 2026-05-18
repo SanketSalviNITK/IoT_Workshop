@@ -256,7 +256,10 @@ function finishExam() {
 
 function showCertificate() {
     document.getElementById('final-cert-name').innerText = studentName || (myTeamId !== null ? teams[myTeamId].name : "Unknown Engineer");
-    window.print();
+    document.getElementById('certificate-modal').classList.remove('hidden');
+    setTimeout(() => {
+        window.print();
+    }, 300);
 }
 
 function initSupabaseSync(code, initialTeams) {
@@ -482,6 +485,7 @@ function setupInteractions() {
     };
 
     document.getElementById('close-exam').onclick = () => document.getElementById('exam-modal').classList.add('hidden');
+    document.getElementById('close-cert').onclick = () => document.getElementById('certificate-modal').classList.add('hidden');
     document.getElementById('download-cert-btn').onclick = () => {
         window.print();
     };
