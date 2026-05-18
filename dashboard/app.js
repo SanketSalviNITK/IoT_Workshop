@@ -84,7 +84,7 @@ const MISSIONS = [
 // --- State ---
 let teams = [], scene, camera, renderer, labelRenderer, composer, controls;
 let tower, island, sea, beacon, particles, finalBeam, currentTeam = null;
-let sessionCode = null, isHost = false, myTeamId = null, myTeamToken = null;
+let sessionCode = null, isHost = false, myTeamId = null, myTeamToken = null, studentName = null;
 const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
 let audioContext;
 
@@ -98,43 +98,107 @@ document.getElementById('host-mode-btn').onclick = () => {
     document.getElementById('host-config').classList.remove('hidden');
 };
 
+document.getElementById('generate-session-btn').onclick = async () => {
+    const newId = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // Save to Supabase
+    const { error } = await supabase.from('sessions').insert([{ host_id: newId, status: 'active' }]);
+    
+    if (!error) {
+        sessionCode = newId;
+        document.getElementById('new-host-id').innerText = newId;
+        document.getElementById('generate-session-btn').classList.add('hidden');
+        document.getElementById('session-active-zone').classList.remove('hidden');
+        speak(`Host ID ${newId} generated. Commanders are authorized.`);
+    } else {
+        console.error("Session creation error:", error);
+        alert("Uplink failed. Check database connection.");
+    }
+};
+
+document.getElementById('start-host-btn').onclick = async () => {
+    const count = parseInt(document.getElementById('team-count').value);
+    isHost = true;
+    
+    const shuffled = [...TEAM_NAMES_POOL].sort(() => 0.5 - Math.random());
+    teams = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0, claimed: false }));
+
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('dash-session-code').innerText = sessionCode;
+    
+    initDashboard(teams);
+    initSupabaseSync(sessionCode, teams);
+    speak(`Initiating Global Sync for ${count} beacon nodes.`);
+};
+
 document.getElementById('join-mode-btn').onclick = () => {
     document.getElementById('setup-main').classList.add('hidden');
     document.getElementById('join-config').classList.remove('hidden');
 };
 
-document.getElementById('start-host-btn').onclick = () => {
-    isHost = true;
-    sessionCode = Math.floor(1000 + Math.random() * 9000).toString();
-    const count = parseInt(document.getElementById('team-count').value);
-    const shuffled = [...TEAM_NAMES_POOL].sort(() => 0.5 - Math.random());
-    const teamData = shuffled.slice(0, count).map((name, i) => ({ id: i, name, progress: 0, claimed: false }));
-    initSupabaseSync(sessionCode, teamData);
-};
-
-document.getElementById('check-code-btn').onclick = () => {
+document.getElementById('check-code-btn').onclick = async () => {
+    const btn = document.getElementById('check-code-btn');
     const code = document.getElementById('session-code').value;
+    const originalText = btn.innerText;
+
     if (code.length === 4) {
+        btn.innerText = "AUTHENTICATING...";
+        btn.disabled = true;
+
+        const { data, error } = await supabase.from('sessions').select('*').eq('host_id', code).eq('status', 'active');
+
+        if (error || !data || data.length === 0) {
+            speak("Access Denied. Invalid Host Key.");
+            alert("WRONG KEY: Secure link could not be established. Verify Host ID.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+        }
+
         sessionCode = code;
+        isHost = false;
         initSupabaseSync(code, []);
+        btn.innerText = "SIGNAL ESTABLISHED";
+        speak("Link verified. Fetching squadron assignments.");
+    } else {
+        alert("Enter a valid 4-digit Host Access Key.");
     }
 };
 
+// --- Session Persistence Recovery ---
+const savedSession = sessionStorage.getItem('beacon_session');
+if (savedSession) {
+    sessionCode = savedSession;
+    const sessionCodeEl = document.getElementById('dash-session-code');
+    if (sessionCodeEl) sessionCodeEl.innerText = sessionCode;
+}
+
+// --- Normalized Team Sync Logic ---
+
+
 document.getElementById('start-join-btn').onclick = () => {
     const sel = document.getElementById('team-selector');
-    if (sel.value !== "") {
+    const nameInput = document.getElementById('student-name-input').value;
+    
+    if (sel.value !== "" && nameInput.trim() !== "") {
         myTeamId = parseInt(sel.value);
+        studentName = nameInput.trim();
         myTeamToken = Math.random().toString(36).substring(7);
+        
         localStorage.setItem(`beacon_token_${sessionCode}`, myTeamToken);
         localStorage.setItem(`beacon_team_${sessionCode}`, myTeamId);
+        localStorage.setItem(`beacon_name_${sessionCode}`, studentName);
         
         channel.send({
             type: 'broadcast',
             event: 'claim_team',
-            payload: { teamId: myTeamId, token: myTeamToken }
+            payload: { teamId: myTeamId, token: myTeamToken, studentName: studentName }
         });
         
         initDashboard(teams);
+        speak(`Welcome to the Signal Corps, Commander ${studentName}. The fleet is counting on you.`);
+    } else {
+        alert("Please provide your name and select a node.");
     }
 };
 
@@ -182,8 +246,8 @@ function checkAnswer(idx) {
 function finishExam() {
     document.getElementById('exam-modal').classList.add('hidden');
     if (examScore >= 4) {
-        speak("Certification Exam Passed. Generating secure credentials.");
-        showCertificate();
+        speak("Certification Exam Passed. Initiating final beacon signal.");
+        triggerVictorySequence();
     } else {
         speak("Certification Failed. Integrity score insufficient. Retry mission.");
         alert(`Score: ${examScore}/${CERT_QUESTIONS.length}. You need 4/5 to pass.`);
@@ -191,22 +255,61 @@ function finishExam() {
 }
 
 function showCertificate() {
-    document.getElementById('certificate-modal').classList.remove('hidden');
-    document.getElementById('final-cert-name').innerText = teams[myTeamId].name;
+    document.getElementById('final-cert-name').innerText = studentName || (myTeamId !== null ? teams[myTeamId].name : "Unknown Engineer");
+    window.print();
 }
 
 function initSupabaseSync(code, initialTeams) {
+    if (channel) {
+        supabase.removeChannel(channel);
+        console.log("📡 RECYCLING PREVIOUS SIGNAL CHANNEL...");
+    }
+
     sessionCode = code;
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') audioContext.resume();
     
     channel = supabase.channel(`session_${sessionCode}`, {
         config: { broadcast: { self: true } }
     });
 
+    const normalize = (s) => s.toUpperCase().replace(/[\s_]/g, '');
+
     channel
         .on('broadcast', { event: 'progress_update' }, ({ payload }) => {
             const { teamId, progress } = payload;
             if (teams[teamId]) updateLocalProgress(teams[teamId], progress);
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `session_id=eq.${sessionCode}` }, (payload) => {
+            const { team_key, progress } = payload.new;
+            const team = teams.find(t => normalize(t.name).includes(normalize(team_key)));
+            if (team) {
+                updateLocalProgress(team, progress);
+                speak(`${team.name} synchronized via Cloud Relay.`);
+            }
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sync_logs', filter: `session_id=eq.${sessionCode}` }, (payload) => {
+            const { team_key, mission_id, created_at, data_payload } = payload.new;
+            const logContainer = document.getElementById('intel-log');
+            if (!logContainer) return;
+
+            const entry = document.createElement('div');
+            const time = new Date(created_at).toLocaleTimeString();
+            
+            let content = `MISSION ${mission_id} LOGGED.`;
+            if (data_payload) {
+                const keys = Object.keys(data_payload);
+                const metrics = keys.map(k => `${k}: ${data_payload[k]}`).join(' | ');
+                content = `TELEMETRY: <span class="alert">${metrics}</span>`;
+            }
+
+            entry.className = 'log-entry hardware';
+            entry.innerHTML = `<span class="system">[${time}]</span> 📡 <strong>${team_key}</strong>: ${content}`;
+            logContainer.prepend(entry);
+            
+            // Stats & Buffer Limit (100)
+            document.getElementById('intel-last-sync').innerText = time;
+            if (logContainer.children.length > 100) logContainer.removeChild(logContainer.lastChild);
         })
         .on('broadcast', { event: 'init_game' }, ({ payload }) => {
             if (teams.length === 0) {
@@ -223,12 +326,19 @@ function initSupabaseSync(code, initialTeams) {
         .on('broadcast', { event: 'claim_team' }, ({ payload }) => {
             if (teams[payload.teamId]) {
                 teams[payload.teamId].claimed = true;
-                if (isHost) updateTeamSelector(teams); // Update host list if needed
+                if (!teams[payload.teamId].participants) teams[payload.teamId].participants = [];
+                if (!teams[payload.teamId].participants.includes(payload.studentName)) {
+                    teams[payload.teamId].participants.push(payload.studentName);
+                }
+                if (isHost) {
+                    updateTeamSelector(teams);
+                    renderTeamList(); // Refresh host view to show names
+                }
             }
         })
         .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-                if (initialTeams.length > 0) {
+                if (initialTeams && initialTeams.length > 0) {
                     initDashboard(initialTeams);
                     channel.send({ type: 'broadcast', event: 'init_game', payload: { teams: initialTeams } });
                 } else {
@@ -237,22 +347,48 @@ function initSupabaseSync(code, initialTeams) {
             }
         });
 
-    document.getElementById('current-code').innerText = code;
-    document.getElementById('session-display').classList.remove('hidden');
+    document.getElementById('dash-session-code').innerText = sessionCode;
+
+    // Move Web Serial here so it always uses the LATEST sessionCode
+    document.getElementById('web-serial-btn').onclick = async () => {
+        if (!("serial" in navigator)) {
+            alert("Web Serial API is not supported in this browser.");
+            return;
+        }
+        try {
+            const port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 115200 });
+            speak("Direct Serial link established.");
+            
+            const decoder = new TextDecoderStream();
+            port.readable.pipeTo(decoder.writable);
+            const reader = decoder.readable.getReader();
+
+            let buffer = "";
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += value;
+                let startIdx;
+                while ((startIdx = buffer.indexOf("[BEACON:SYNC:")) !== -1) {
+                    let endIdx = buffer.indexOf("]", startIdx);
+                    if (endIdx === -1) break;
+                    const token = buffer.substring(startIdx + 1, endIdx);
+                    buffer = buffer.substring(endIdx + 1);
+                    const parts = token.split(":");
+                    if (parts.length >= 6) {
+                        const host = parts[2], teamKey = parts[3], missionNum = parseInt(parts[4]);
+                        if (host === sessionCode || isHost) {
+                            const team = teams.find(t => normalize(t.name).includes(normalize(teamKey)));
+                            if (team) updateProgress(team, missionNum);
+                        }
+                    }
+                }
+            }
+        } catch (err) { console.error(err); }
+    };
 }
 
-function updateTeamSelector(teamData) {
-    const sel = document.getElementById('team-selector');
-    sel.innerHTML = '<option value="">-- SELECT TEAM --</option>';
-    teamData.forEach(t => {
-        if (!t.claimed) {
-            const opt = document.createElement('option');
-            opt.value = t.id;
-            opt.textContent = t.name;
-            sel.appendChild(opt);
-        }
-    });
-}
 
 function initDashboard(teamData) {
     document.getElementById('setup-screen').style.opacity = '0';
@@ -347,7 +483,45 @@ function setupInteractions() {
 
     document.getElementById('close-exam').onclick = () => document.getElementById('exam-modal').classList.add('hidden');
     document.getElementById('download-cert-btn').onclick = () => {
-        window.print(); // Simple way to save the certificate as PDF
+        window.print();
+    };
+
+    // --- Live Intel & Maintenance Logic ---
+    const intelPanel = document.getElementById('live-intel-panel');
+    document.getElementById('global-status').onclick = () => {
+        intelPanel.classList.toggle('collapsed');
+        if (!intelPanel.classList.contains('collapsed')) {
+            speak("Live Intel Feed Synchronized.");
+        }
+    };
+    document.getElementById('close-intel').onclick = () => intelPanel.classList.add('collapsed');
+
+    // Data Actions
+    document.getElementById('export-data-btn').onclick = async () => {
+        const { data, error } = await supabase.from('sync_logs').select('*').eq('session_id', sessionCode);
+        if (data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `beacon_session_${sessionCode}_data.json`;
+            a.click();
+            speak("Telemetry data exported successfully.");
+        }
+    };
+
+    document.getElementById('purge-data-btn').onclick = async () => {
+        if (confirm("☢️ WARNING: This will permanently delete all logs and team progress for this session. Proceed?")) {
+            const { error: logErr } = await supabase.from('sync_logs').delete().eq('session_id', sessionCode);
+            const { error: teamErr } = await supabase.from('teams').delete().eq('session_id', sessionCode);
+            
+            if (!logErr && !teamErr) {
+                document.getElementById('intel-log').innerHTML = '<div class="log-entry system">> DATA PURGE COMPLETE. SECTOR RESET.</div>';
+                speak("Sector 7 logs and teams cleared.");
+                teams.forEach(t => { t.progress = 0; t.status = 'OFFLINE'; });
+                renderRoadmap();
+            }
+        }
     };
 }
 
@@ -487,6 +661,7 @@ function openBriefing(t) {
         return;
     }
 
+    currentTeam = t;
     const m = MISSIONS[t.progress];
     document.getElementById('modal-team-name').innerText = t.name;
     document.getElementById('modal-mission-num').innerText = t.progress + 1;
@@ -504,6 +679,29 @@ function openBriefing(t) {
     document.getElementById('tab-mission').classList.remove('hidden');
     
     document.getElementById('briefing-modal').classList.remove('hidden');
+    
+    // Add Authorization Button for Mission 7 (If Host or Admin)
+    const btnContainer = document.getElementById('tab-mission');
+    const existingAuthBtn = document.getElementById('remote-auth-btn');
+    if (existingAuthBtn) existingAuthBtn.remove();
+
+    if ((isHost || isAdmin) && t.progress === 6) {
+        const authBtn = document.createElement('button');
+        authBtn.id = 'remote-auth-btn';
+        authBtn.className = 'big-btn success-msg';
+        authBtn.style.marginTop = '20px';
+        authBtn.innerText = '⚡ AUTHORIZE FINAL BEACON';
+        authBtn.onclick = async () => {
+            const { error } = await supabase.from('teams').update({ progress: 77 }).eq('team_key', t.name).eq('session_id', sessionCode);
+            if (!error) {
+                speak("Transmission Authorized. Awaiting hardware pulse.");
+                authBtn.innerText = "WAITING FOR PULSE...";
+                authBtn.disabled = true;
+            }
+        };
+        btnContainer.appendChild(authBtn);
+    }
+
     playSound(600, 'square', 0.1, 0.05);
 }
 
@@ -519,6 +717,7 @@ function updateProgress(t, p) {
 }
 
 function updateLocalProgress(t, p) {
+    if (t.progress >= p) return;
     t.progress = p;
     const c = PROGRESS_COLORS[p];
     if (t.diamond) {
@@ -528,7 +727,6 @@ function updateLocalProgress(t, p) {
     renderTeamList();
     updateGlobalStatus();
     speak(`${t.name} synchronized for phase ${p}.`);
-    if (teams.every(team => team.progress === 7)) triggerVictorySequence();
 }
 
 function updateGlobalStatus() {
@@ -542,22 +740,42 @@ function renderTeamList() {
     teams.forEach(t => {
         const row = document.createElement('div'); row.className = 'team-row';
         row.innerHTML = `
-            <div class="team-info"><span>${t.name}</span><span>${t.progress}/7</span></div>
+            <div class="team-info" style="cursor: pointer;" onclick="window.openTeamBriefing(${t.id})">
+                <div class="team-meta">
+                    <span class="team-name">${t.name}</span>
+                    <span class="team-participants">${t.participants ? t.participants.join(', ') : ''}</span>
+                </div>
+                <span>${t.progress}/7</span>
+            </div>
             <div class="team-progress" data-team-id="${t.id}">
                 ${Array(7).fill(0).map((_, i) => `<div class="segment ${i < t.progress ? 'active' : ''}" data-idx="${i}"></div>`).join('')}
             </div>`;
         l.appendChild(row);
     });
+    
+    // Bind to window for the onclick string to work
+    window.openTeamBriefing = (id) => {
+        if (teams[id] && teams[id].progress < 7) {
+            openBriefing(teams[id]);
+        }
+    };
 
-    // Certification Button for Local Team
-    if (myTeamId !== null && teams[myTeamId] && teams[myTeamId].progress === 7) {
-        const certBtn = document.createElement('button');
-        certBtn.id = 'start-exam-btn';
-        certBtn.className = 'big-btn';
-        certBtn.style.marginTop = '20px';
-        certBtn.innerText = '🎓 START CERTIFICATION EXAM';
-        certBtn.onclick = startExam;
-        l.appendChild(certBtn);
+
+    // Certification Button for Local Team (Fixed Action Bar)
+    const actionsEl = document.getElementById('mission-actions');
+    if (actionsEl) {
+        actionsEl.innerHTML = '';
+        if (myTeamId !== null && teams[myTeamId] && teams[myTeamId].progress === 7) {
+            actionsEl.classList.remove('hidden');
+            const certBtn = document.createElement('button');
+            certBtn.id = 'start-exam-btn';
+            certBtn.className = 'big-btn pulse-glowing';
+            certBtn.innerText = '🎓 START CERTIFICATION EXAM';
+            certBtn.onclick = startExam;
+            actionsEl.appendChild(certBtn);
+        } else {
+            actionsEl.classList.add('hidden');
+        }
     }
 
     // Admin Override: Clicking segments manually updates progress
@@ -572,6 +790,21 @@ function renderTeamList() {
         });
     });
 }
+
+function updateTeamSelector(teamData) {
+    const sel = document.getElementById('team-selector');
+    if (!sel) return;
+    sel.innerHTML = '<option value="" disabled selected>-- SECURE CHANNEL --</option>';
+    teamData.forEach(t => {
+        if (!t.claimed) {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.innerText = t.name;
+            sel.appendChild(opt);
+        }
+    });
+}
+
 
 // --- Admin Toggle Logic ---
 let isAdmin = false;
@@ -643,7 +876,19 @@ function triggerVictorySequence() {
     finalBeam.visible = true;
     new TWEEN.Tween(finalBeam.scale).to({ y: 500 }, 5000).easing(TWEEN.Easing.Exponential.In).start();
     new TWEEN.Tween(finalBeam.position).to({ y: 250 }, 5000).easing(TWEEN.Easing.Exponential.In).start();
-    setTimeout(() => { document.getElementById('victory-overlay').classList.remove('hidden'); }, 6000);
+    
+    // Bind certificate function to window for the button in index.html
+    window.downloadCertificate = showCertificate;
+
+    setTimeout(() => { 
+        // Hide all active dashboard panels to prevent any layout overlap
+        const panelIds = ['mission-panel', 'aria-log', 'global-status', 'roadmap-btn', 'live-intel-panel'];
+        panelIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+        document.getElementById('victory-overlay').classList.remove('hidden'); 
+    }, 6000);
 }
 
 function startAriaLog() {

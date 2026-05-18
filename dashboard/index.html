@@ -26,25 +26,36 @@
             <!-- Host Config (Hidden) -->
             <div id="host-config" class="hidden">
                 <div class="input-group">
-                    <label for="team-count">NUMBER OF BEACON TEAMS (1-30):</label>
-                    <input type="number" id="team-count" min="1" max="30" value="5">
-                    <button id="start-host-btn">START GLOBAL SYNC</button>
+                    <p class="mission-tag">COMMANDER AUTHENTICATION</p>
+                    <button id="generate-session-btn" class="big-btn">GENERATE NEW HOST ID</button>
+                    
+                    <div id="session-active-zone" class="hidden">
+                        <div class="label">ACTIVE HOST ID:</div>
+                        <div id="new-host-id" class="glitch-text" style="font-size: 3rem; color: var(--cyan);">----</div>
+                        <label for="team-count">NUMBER OF BEACON TEAMS (1-30):</label>
+                        <input type="number" id="team-count" min="1" max="30" value="5">
+                        <button id="start-host-btn">START GLOBAL SYNC</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Join Config (Hidden) -->
             <div id="join-config" class="hidden">
                 <div class="input-group">
-                    <label for="session-code">ENTER 4-DIGIT SESSION CODE:</label>
+                    <p class="mission-tag">RECRUITMENT PROTOCOL</p>
+                    <label for="student-name-input">FULL NAME(S) (FOR CERTIFICATION):</label>
+                    <input type="text" id="student-name-input" placeholder="e.g. Alice, Bob, and Charlie">
+
+                    <label for="session-code">ENTER 4-DIGIT HOST ACCESS KEY:</label>
                     <input type="text" id="session-code" placeholder="XXXX" maxlength="4">
-                    <button id="check-code-btn">FETCH TEAM LIST</button>
+                    <button id="check-code-btn">FETCH ASSIGNED TEAMS</button>
                     
                     <div id="team-select-zone" class="hidden">
-                        <label for="team-selector">SELECT YOUR ASSIGNED TEAM:</label>
+                        <label for="team-selector">SELECT YOUR SIGNAL NODE:</label>
                         <select id="team-selector">
                             <option value="">-- SELECT TEAM --</option>
                         </select>
-                        <button id="start-join-btn">ESTABLISH SECURE LINK</button>
+                        <button id="start-join-btn">ENLIST IN THE FLEET</button>
                     </div>
                 </div>
             </div>
@@ -121,14 +132,47 @@
                     <h1 class="glitch-text" data-text="MASTER CERTIFIED">MASTER CERTIFIED</h1>
                     <div id="certificate-preview">
                         <div class="cert-frame">
+                            <!-- Decorative Gold Corners -->
+                            <div class="corner corner-tl"></div>
+                            <div class="corner corner-tr"></div>
+                            <div class="corner corner-bl"></div>
+                            <div class="corner corner-br"></div>
+                            
+                            <div class="inner-frame"></div>
+
+                            <!-- Glowing watermark seal in background -->
+                            <div class="seal-container">
+                                <svg class="seal-svg" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" stroke-width="0.5" stroke-dasharray="2 1" />
+                                    <circle cx="50" cy="50" r="40" stroke-width="0.3" />
+                                    <polygon points="50,15 59,34 80,37 65,51 68,72 50,62 32,72 35,51 20,37 41,34" stroke-width="0.3" />
+                                </svg>
+                            </div>
+
                             <div class="cert-title">THE LAST BEACON</div>
-                            <div class="cert-award">CERTIFICATE OF MERIT</div>
-                            <div class="cert-to">Awarded to</div>
+                            <div class="cert-award">CERTIFICATE OF MASTERY</div>
+                            <div class="badge-divider"></div>
+                            
+                            <div class="cert-to">This is to officially recognize</div>
                             <div class="cert-name" id="final-cert-name">Agni Archers</div>
-                            <div class="cert-desc">For demonstrating mastery in IoT Hardware and Cloud Logic.</div>
+                            <div class="cert-desc">For successfully establishing a secure hardware-to-cloud telemetry uplink, completing the intensive multi-relay signal protocol, and masterfully synchronizing the final pulse on the Dharani Island Beacon Network.</div>
+                            
                             <div class="cert-footer">
-                                <span>ARI-A SYSTEM AI</span>
-                                <span>COMMANDER [USER]</span>
+                                <div class="signature-block">
+                                    <div class="signature">Dr. Sanket Salvi</div>
+                                    <div class="sign-line">Dr. Sanket Salvi</div>
+                                    <div class="sign-title">Assistant Professor, MIT-WPU</div>
+                                </div>
+                                <div class="signature-block">
+                                    <div class="signature" style="letter-spacing: 1px;">A.R.I.A.</div>
+                                    <div class="sign-line">Ari-A System AI</div>
+                                    <div class="sign-title">Sector 7 Cybernetic Intel</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Cryptographic Telemetry Stamp -->
+                            <div class="validation-footer">
+                                VALIDATION HASH: 0x8F9B2C4E978F | PROTOCOL: LB-2084-SEC7 | STATUS: VERIFIED & DEPLOYED
                             </div>
                         </div>
                     </div>
@@ -164,6 +208,8 @@
                 <div id="team-list">
                     <!-- Teams will be injected here -->
                 </div>
+                <!-- Fixed Dynamic Actions Container -->
+                <div id="mission-actions" class="hidden"></div>
             </div>
 
             <!-- Bottom Right: A.R.I.A. Log -->
@@ -176,12 +222,35 @@
                 </div>
             </div>
 
+            <!-- Live Intel Panel (Collapsible) -->
+            <div id="live-intel-panel" class="panel collapsed">
+                <div class="panel-header">
+                    <span class="glitch-text" data-text="SECTOR 7: LIVE INTEL">SECTOR 7: LIVE INTEL</span>
+                    <button id="close-intel">×</button>
+                </div>
+                <div id="intel-content">
+                    <div id="intel-stats">
+                        <div class="stat-item">ACTIVE NODES: <span id="intel-active-nodes">0</span></div>
+                        <div class="stat-item">LAST SYNC: <span id="intel-last-sync">--:--:--</span></div>
+                    </div>
+                    <div id="intel-log">
+                        <!-- Real-time logs from sync_logs will appear here -->
+                        <div class="log-entry system">> INITIALIZING INTEL FEED...</div>
+                    </div>
+                    <div id="intel-actions">
+                        <button id="export-data-btn" class="mini-btn">📥 EXPORT CSV</button>
+                        <button id="purge-data-btn" class="mini-btn danger">☢️ PURGE LOGS</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Top Right: Global Progress -->
             <div id="global-status" class="panel">
                 <div class="label">GLOBAL SYNC</div>
                 <div id="global-percent">0%</div>
                 <div class="sync-bar"><div id="global-bar-fill"></div></div>
                 <div id="mission-session-info">CHANNEL: <span id="dash-session-code">----</span></div>
+                <button id="web-serial-btn" class="mini-btn">🔌 ESTABLISH SERIAL LINK</button>
             </div>
         </div>
 
@@ -190,7 +259,10 @@
             <div class="victory-content">
                 <h1 class="glitch-text" data-text="MISSION ACCOMPLISHED">MISSION ACCOMPLISHED</h1>
                 <p>THE BEACON IS FULLY RESTORED. RESCUE SIGNAL TRANSMITTED.</p>
-                <button onclick="location.reload()">RE-INITIATE SYSTEMS</button>
+                <div class="victory-actions">
+                    <button class="big-btn" onclick="window.downloadCertificate()">🎓 DOWNLOAD CERTIFICATE</button>
+                    <button class="big-btn secondary" onclick="location.reload()">🔄 RE-INITIATE SYSTEMS</button>
+                </div>
             </div>
         </div>
     </div>

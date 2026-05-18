@@ -3,56 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE LAST BEACON | Certificate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <title>THE LAST BEACON | Certificate of Mastery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;1,600&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #00ffcc; font-family: 'Rajdhani', sans-serif; }
-        #certificate {
-            width: 800px;
-            height: 500px;
-            border: 5px double #00ffcc;
-            padding: 40px;
-            text-align: center;
-            background: rgba(10, 25, 47, 0.9);
-            box-shadow: 0 0 50px rgba(0, 255, 204, 0.3);
-            position: relative;
+        :root {
+            --gold: #d4af37;
+            --gold-bright: #f3e5ab;
+            --bg-dark: #070b13;
+            --border-color: rgba(212, 175, 55, 0.35);
+        }
+        body {
+            background: #030509;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #e0e6ed;
+            font-family: 'Montserrat', sans-serif;
             overflow: hidden;
         }
-        #certificate::before {
-            content: "CERTIFIED";
-            position: absolute;
-            top: -20px;
-            right: -50px;
-            background: #00ffcc;
-            color: #050505;
-            padding: 40px 100px;
-            transform: rotate(45deg);
-            font-family: 'Orbitron', sans-serif;
-            font-weight: bold;
+        #certificate-container {
+            position: relative;
+            width: 850px;
+            height: 580px;
+            padding: 45px 40px;
+            background: radial-gradient(circle at center, #0e1726 0%, #05080f 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
         }
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 3rem; margin-top: 60px; letter-spacing: 5px; text-shadow: 0 0 20px #00ffcc; }
-        .subtitle { font-size: 1.5rem; text-transform: uppercase; margin-bottom: 40px; color: #0066ff; }
-        .name-line { border-bottom: 2px solid #00ffcc; width: 60%; margin: 20px auto; font-size: 2.5rem; padding: 10px; font-weight: bold; }
-        .footer { margin-top: 50px; display: flex; justify-content: space-around; font-size: 0.9rem; }
-        .sign { border-top: 1px solid #00ffcc; padding-top: 5px; width: 200px; }
+        
+        /* Ornamental Gold Corner Brackets */
+        .corner {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border: 2px solid var(--gold);
+            pointer-events: none;
+        }
+        .corner-tl { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 15px; right: 15px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 15px; left: 15px; border-right: none; border-top: none; }
+        .corner-br { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+        
+        /* Thin Elegant Inner Border Frame */
+        .inner-frame {
+            position: absolute;
+            top: 25px; bottom: 25px; left: 25px; right: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            pointer-events: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 12px;
+            color: var(--gold);
+            margin: 0;
+            text-indent: 12px; /* Perfect spacing offset */
+        }
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: #ffffff;
+            margin: 8px 0 0 0;
+            text-shadow: 0 2px 12px rgba(255,255,255,0.1);
+        }
+        .badge-divider {
+            width: 100px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 15px auto 5px auto;
+        }
+        
+        .content {
+            text-align: center;
+            max-width: 680px;
+            z-index: 2;
+            margin-top: -10px;
+        }
+        .cert-to {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: #8c9cb0;
+            margin: 0 0 12px 0;
+        }
+        .name-line {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            border-bottom: 1px dashed rgba(212, 175, 55, 0.4);
+            width: 80%;
+            margin: 0 auto 18px auto;
+            padding: 5px;
+            outline: none;
+            cursor: text;
+            transition: all 0.3s;
+        }
+        .name-line:focus {
+            border-bottom-color: var(--gold-bright);
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .award-desc {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #a3b1c6;
+            margin: 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Subtle Background Watermark Seal */
+        .seal-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .seal-svg {
+            width: 250px;
+            height: 250px;
+            fill: none;
+            stroke: var(--gold);
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 50px;
+            z-index: 2;
+        }
+        .signature-block {
+            text-align: center;
+        }
+        .signature {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gold-bright);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sign-line {
+            border-top: 1px solid rgba(212, 175, 55, 0.25);
+            width: 190px;
+            margin-top: 5px;
+            padding-top: 5px;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            color: #8c9cb0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        .sign-title {
+            font-size: 0.6rem;
+            color: #58677c;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cryptographic Telemetry Validation */
+        .validation-footer {
+            font-family: monospace;
+            font-size: 0.6rem;
+            color: #3b4b61;
+            width: 100%;
+            text-align: center;
+            margin-top: 15px;
+            letter-spacing: 1.5px;
+        }
     </style>
 </head>
 <body>
-    <div id="certificate">
-        <p class="subtitle">This is to certify that</p>
-        <div class="name-line" contenteditable="true">ENTER ENGINEER NAME</div>
-        <h1>BEACON ENGINEER</h1>
-        <p>Has successfully restored the communication relay station on the Island of Dharani and transmitted the Last Beacon signal.</p>
+    <div id="certificate-container">
+        <!-- Ornamental Gold Corners -->
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
         
+        <div class="inner-frame"></div>
+
+        <!-- Glowing watermark seal in background -->
+        <div class="seal-container">
+            <svg class="seal-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke-width="0.5" stroke-dasharray="2 1" />
+                <circle cx="50" cy="50" r="40" stroke-width="0.3" />
+                <circle cx="50" cy="50" r="32" stroke-width="0.2" stroke-dasharray="1 1" />
+                <polygon points="50,15 59,34 80,37 65,51 68,72 50,62 32,72 35,51 20,37 41,34" stroke-width="0.3" />
+            </svg>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header">
+            <p class="title">THE LAST BEACON</p>
+            <h2 class="subtitle">CERTIFICATE OF MASTERY</h2>
+            <div class="badge-divider"></div>
+        </div>
+
+        <!-- Body Content -->
+        <div class="content">
+            <p class="cert-to">This is to officially recognize</p>
+            <div class="name-line" contenteditable="true" spellcheck="false">ENTER ENGINEER NAME</div>
+            <p class="award-desc">
+                For successfully establishing a secure hardware-to-cloud telemetry uplink, completing the intensive multi-relay signal protocol, and masterfully synchronizing the final pulse on the Dharani Island Beacon Network.
+            </p>
+        </div>
+
+        <!-- Signatures Section -->
         <div class="footer">
-            <div class="sign">
-                <strong>A.R.I.A.</strong><br>
-                System Intelligence
+            <div class="signature-block">
+                <div class="signature">Dr. Sanket Salvi</div>
+                <div class="sign-line">Dr. Sanket Salvi</div>
+                <div class="sign-title">Assistant Professor, MIT-WPU</div>
             </div>
-            <div class="sign">
-                <strong>Dr. Sanket Salvi</strong><br>
-                Assistant Professor, MIT-WPU
+            <div class="signature-block">
+                <div class="signature" style="letter-spacing: 1px;">A.R.I.A.</div>
+                <div class="sign-line">Ari-A System AI</div>
+                <div class="sign-title">Sector 7 Cybernetic Intel</div>
             </div>
+        </div>
+
+        <!-- Cryptographic Telemetry Stamp -->
+        <div class="validation-footer">
+            VALIDATION HASH: 0x8F9B2C4E978F | PROTOCOL: LB-2084-SEC7 | STATUS: VERIFIED & DEPLOYED
         </div>
     </div>
 </body>

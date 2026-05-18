@@ -1,14 +1,35 @@
-# IoT Workshop Git Ignore
+# =========================================================================
+# "The Last Beacon" GitHub Repository Exclusions (.gitignore)
+# =========================================================================
 
-# Sensitive Overleaf Files
+# 1. Sensitive Overleaf Credentials & CLI Metadata
+.ol*
+olcli*
 .olauth
 .olproject
 .olignore
 .olcli.json
 
-# LaTeX temporary files
-*.aux
+# 2. Academic Manuscript & Publication Files
+LastBeacon_Paper/
+publication_assets/
+presentation/
+"book assets"/
+book assets/
+
+# 3. Unnecessary Libraries & Node Packages
+node_modules/
+**/node_modules/
+package-lock.json
+
+# 4. Local System Cache & Temp Logs
+error.log
 *.log
+.DS_Store
+Thumbs.db
+
+# 5. LaTeX Output & Temporary Compile Artifacts
+*.aux
 *.out
 *.toc
 *.nav
@@ -17,7 +38,3 @@
 *.gz
 *.fdb_latexmk
 *.fls
-
-# OS Files
-.DS_Store
-Thumbs.db

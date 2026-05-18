@@ -263,13 +263,26 @@ button:hover {
 .team-info {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 5px;
     font-weight: bold;
 }
 
+.team-meta {
+    display: flex;
+    flex-direction: column;
+}
+
 .team-name {
-    font-size: 0.9rem;
-    color: #fff;
+    font-size: 1rem;
+    color: var(--cyan);
+}
+
+.team-participants {
+    font-size: 0.7rem;
+    color: var(--blue);
+    opacity: 0.7;
+    font-family: 'Rajdhani', sans-serif;
 }
 
 .team-progress {
@@ -377,6 +390,18 @@ button:hover {
     font-family: 'Orbitron', sans-serif;
     color: var(--cyan);
     margin-bottom: 20px;
+}
+
+.victory-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.victory-actions .big-btn {
+    width: auto;
+    min-width: 250px;
 }
 
 /* --- Briefing Modal --- */
@@ -578,7 +603,7 @@ button:hover {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95);
+    background: rgba(0,0,0,0.98);
     z-index: 500;
     display: flex;
     justify-content: center;
@@ -586,23 +611,281 @@ button:hover {
 }
 
 .cert-frame {
-    background: #000;
-    border: 10px double var(--cyan);
-    padding: 60px;
-    width: 800px;
-    height: 600px;
+    background: radial-gradient(circle at center, #0e1726 0%, #05080f 100%);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    padding: 45px 40px;
+    width: 850px;
+    height: 580px;
     position: relative;
     text-align: center;
-    color: var(--cyan);
-    font-family: 'Orbitron', sans-serif;
-    box-shadow: 0 0 50px rgba(0,255,204,0.2);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
 }
 
-.cert-title { font-size: 1rem; color: var(--blue); letter-spacing: 10px; margin-bottom: 40px; }
-.cert-award { font-size: 3rem; margin-bottom: 20px; }
-.cert-to { font-family: 'Rajdhani'; font-size: 1.2rem; margin-bottom: 20px; }
-.cert-name { font-size: 4rem; color: #fff; text-decoration: underline; margin-bottom: 40px; }
-.cert-desc { font-family: 'Rajdhani'; font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 0 auto; }
-.cert-footer { display: flex; justify-content: space-between; margin-top: 60px; font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 20px; }
+.cert-frame > * { position: relative; z-index: 2; }
 
-#download-cert-btn { margin-top: 30px; letter-spacing: 2px; }
+/* Ornamental Corners inside Modal Frame */
+.cert-frame .corner {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border: 2px solid var(--gold);
+    pointer-events: none;
+    z-index: 3;
+}
+.cert-frame .corner-tl { top: 15px; left: 15px; border-right: none; border-bottom: none; }
+.cert-frame .corner-tr { top: 15px; right: 15px; border-left: none; border-bottom: none; }
+.cert-frame .corner-bl { bottom: 15px; left: 15px; border-right: none; border-top: none; }
+.cert-frame .corner-br { bottom: 15px; right: 15px; border-left: none; border-top: none; }
+
+.cert-frame .inner-frame {
+    position: absolute;
+    top: 25px; bottom: 25px; left: 25px; right: 25px;
+    border: 1px solid rgba(212, 175, 55, 0.12);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Watermark Seal inside Modal Frame */
+.cert-frame .seal-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 1;
+}
+.cert-frame .seal-svg {
+    width: 250px;
+    height: 250px;
+    fill: none;
+    stroke: var(--gold);
+}
+
+.cert-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: var(--gold);
+    margin: 0;
+    text-indent: 12px;
+}
+.cert-award {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: #ffffff;
+    margin: 8px 0 0 0;
+    text-shadow: 0 2px 12px rgba(255,255,255,0.1);
+}
+.cert-frame .badge-divider {
+    width: 100px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 15px auto 5px auto;
+}
+.cert-to {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: #8c9cb0;
+    margin: 10px 0;
+}
+.cert-name {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    border-bottom: 1px dashed rgba(212, 175, 55, 0.4);
+    width: 80%;
+    margin: 0 auto 18px auto;
+    padding: 5px;
+    display: block;
+}
+.cert-desc {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #a3b1c6;
+    margin: 10px auto;
+    max-width: 680px;
+    letter-spacing: 0.5px;
+}
+.cert-footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+    margin-top: 15px;
+}
+
+.cert-footer .signature-block {
+    text-align: center;
+}
+.cert-footer .signature {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gold-bright);
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cert-footer .sign-line {
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+    width: 190px;
+    margin-top: 5px;
+    padding-top: 5px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: #8c9cb0;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.cert-footer .sign-title {
+    font-size: 0.6rem;
+    color: #58677c;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+@media print {
+    body * { visibility: hidden; }
+    #certificate-modal, #certificate-modal * { visibility: visible; }
+    #certificate-modal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #030509; }
+    .cert-frame { border: 1px solid rgba(212, 175, 55, 0.35); width: 850px; height: 580px; box-shadow: none; margin: 50px auto; }
+    #download-cert-btn, .mini-btn, button { display: none !important; }
+}
+
+/* --- Live Intel Panel --- */
+#live-intel-panel {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    max-height: 400px;
+    z-index: 1000;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(5, 5, 5, 0.95);
+    border: 1px solid var(--cyan);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+#live-intel-panel.collapsed {
+    top: -380px;
+    opacity: 0.5;
+}
+
+#intel-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+#intel-stats {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    color: var(--cyan);
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+    padding-bottom: 10px;
+}
+
+#intel-log {
+    height: 200px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    overflow-y: auto;
+    border: 1px inset rgba(0, 255, 204, 0.1);
+}
+
+.log-entry.system { color: #888; font-style: italic; }
+.log-entry.hardware { color: var(--cyan); }
+.log-entry.alert { color: #ff3300; font-weight: bold; }
+
+#intel-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.mini-btn {
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    background: rgba(0, 255, 204, 0.1);
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mini-btn:hover { background: var(--cyan); color: #000; }
+.mini-btn.danger { border-color: #ff3300; color: #ff3300; background: rgba(255, 51, 0, 0.05); }
+.mini-btn.danger:hover { background: #ff3300; color: #000; }
+
+#global-status { cursor: pointer; } /* Make it clickable to toggle intel */
+
+/* --- Cyberpunk Dynamic Actions Bar --- */
+#mission-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border);
+    transition: all 0.5s ease-in-out;
+}
+
+/* Stunning Glowing Gradient Button for Certification */
+.pulse-glowing {
+    background: linear-gradient(135deg, var(--cyan), var(--blue)) !important;
+    color: #050505 !important;
+    font-weight: 800 !important;
+    letter-spacing: 2px !important;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+    box-shadow: 0 0 15px var(--cyan);
+    border: 2px solid #ffffff !important;
+    animation: cyberPulse 2s infinite alternate;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pulse-glowing:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 0 25px var(--cyan), 0 0 15px var(--blue);
+    background: linear-gradient(135deg, #ffffff, var(--cyan)) !important;
+    color: #000000 !important;
+}
+
+@keyframes cyberPulse {
+    0% {
+        box-shadow: 0 0 8px var(--cyan), 0 0 4px var(--blue);
+    }
+    100% {
+        box-shadow: 0 0 20px var(--cyan), 0 0 12px var(--blue);
+    }
+}
+
+/* Ensure perfect overlay isolation */
+#mission-panel {
+    z-index: 200 !important; /* Slightly elevated dashboard element */
+}
+
+#victory-overlay {
+    z-index: 99999 !important; /* Absolute top-most fullscreen layer in the universe */
+}
+
